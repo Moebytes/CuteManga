@@ -34,6 +34,12 @@
     box-sizing: border-box;
     scrollbar-width: thin;
     scrollbar-color: var(--titlebarBG) var(--background);
+    user-select: none;
+}
+
+span {
+    user-select: text !important;
+    -webkit-touch-callout: default !important;
 }
 
 .stop-transitions * { 
@@ -48,8 +54,6 @@ html, body {
     width: 100%;
     height: 100%;
     background-color: black;
-    position: relative;
-    z-index: -1000;
     -webkit-touch-callout: none;
 }
 

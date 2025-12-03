@@ -1,7 +1,6 @@
 import React, {useEffect, useState, useContext, useReducer} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
 import Context, {EnableDragContext, MobileContext} from "./Context"
-import axios from "axios"
 import functions from "./structures/Functions"
 import HomePage from "./pages/HomePage"
 import HiddenPage from "./pages/HiddenPage"
@@ -12,8 +11,6 @@ import TermsPage from "./pages/TermsPage"
 import ViewerPage from "./pages/ViewerPage"
 import $404Page from "./pages/404Page"
 import "./index.less"
-
-require.context("./assets/icons", true)
 
 const App: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
