@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useLayoutActions, useReadingSelector, useReadingActions, useThemeSelector, 
 useThemeActions, useFlagSelector, useFlagActions} from "../store"
-import functions from "../structures/Functions"
 import BackIcon from "../assets/svg/back.svg"
 import BookmarkIcon from "../assets/svg/bookmark.svg"
 import UnbookmarkIcon from "../assets/svg/unbookmark.svg"
@@ -25,27 +24,6 @@ import database from "../json/database"
 import hiddenDatabase from "../json/database-hidden"
 import Slider from "react-slider"
 import "./styles/pdfcontrols.less"
-
-const colorList = {
-    "--selection": "rgba(255, 168, 233, 0.302)",
-    "--text": "#fd3a9c",
-    "--text-alt": "#f141cb",
-    "--background": "#380022",
-    "--titlebarBG": "#660013",
-    "--titlebarText": "#fc2cb7",
-    "--titlebarText2": "#b30074",
-    "--titlebarTextAlt": "#9c1c37",
-    "--sidebarBG": "#240400",
-    "--sidebarText": "#b30074",
-    "--sidebarButton": "#a3001b",
-    "--sidebarLink": "#f21c8e",
-    "--sortbarButton": "#b30074",
-    "--sortbarSearchBG": "#570038",
-    "--gridButton": "#f53dab",
-    "--footerBG": "#330021",
-    "--pdfControlsBG": "#c70038",
-    "--dropdownBG": "rgba(51, 0, 33, 0.95)"
-}
 
 interface Props {
     id: string
@@ -72,32 +50,18 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
         const savedHorizontal = localStorage.getItem("horizontal")
         const savedShowEn = localStorage.getItem("showEn")
         const savedZoom = localStorage.getItem("zoom")
-        const savedHue = localStorage.getItem("siteHue")
-        const savedSaturation = localStorage.getItem("siteSaturation")
-        const savedLightness = localStorage.getItem("siteLightness")
         if (savedThumbnails) setShowThumbnails(JSON.parse(savedThumbnails))
         if (savedHorizontal) setHorizontal(JSON.parse(savedHorizontal))
         if (savedShowEn) setShowEn(JSON.parse(savedShowEn))
         if (savedZoom) setZoom(savedZoom)
-        if (savedHue) setSiteHue(Number(savedHue))
-        if (savedSaturation) setSiteSaturation(Number(savedSaturation))
-        if (savedLightness) setSiteLightness(Number(savedLightness))
     }, [])
 
     useEffect(() => {
-        if (typeof window === "undefined") return
-        for (let i = 0; i < Object.keys(colorList).length; i++) {
-            const key = Object.keys(colorList)[i]
-            const color = Object.values(colorList)[i]
-            document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, siteLightness))
-        }
-        setTimeout(() => {
-            // props.rerender()
-        }, 100)
-        localStorage.setItem("siteHue", String(siteHue))
-        localStorage.setItem("siteSaturation", String(siteSaturation))
-        localStorage.setItem("siteLightness", String(siteLightness))
-    }, [siteHue, siteSaturation, siteLightness])
+        localStorage.setItem("showThumbnails", JSON.stringify(showThumbnails))
+        localStorage.setItem("horizontal", JSON.stringify(horizontal))
+        localStorage.setItem("showEn", JSON.stringify(showEn))
+        localStorage.setItem("zoom", zoom)
+    }, [showThumbnails, horizontal, showEn, zoom])
 
     const resetFilters = () => {
         setSiteHue(180)
@@ -114,13 +78,6 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
             setZoom("100%")
         }
     }, [mobile])
-
-    useEffect(() => {
-        localStorage.setItem("showThumbnails", JSON.stringify(showThumbnails))
-        localStorage.setItem("horizontal", JSON.stringify(horizontal))
-        localStorage.setItem("showEn", JSON.stringify(showEn))
-        localStorage.setItem("zoom", zoom)
-    }, [showThumbnails, horizontal, showEn, zoom])
 
     useEffect(() => {
         if (page && !Number.isNaN(Number(page))) setLastPage(String(Number(page)))

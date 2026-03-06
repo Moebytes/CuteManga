@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react"
+import React, {useState} from "react"
 import {useLayoutSelector, useLayoutActions, useThemeSelector, useThemeActions} from "../store"
 import {useNavigate} from "react-router-dom"
 import favicon from "../assets/icons/favicon.png"
@@ -7,27 +7,6 @@ import LightIcon from "../assets/svg/light.svg"
 import DarkIcon from "../assets/svg/dark.svg"
 import Slider from "react-slider"
 import "./styles/titlebar.less"
-
-const colorList = {
-    "--selection": "rgba(255, 168, 233, 0.302)",
-    "--text": "#fd3a9c",
-    "--text-alt": "#f141cb",
-    "--background": "#280119",
-    "--titlebarBG": "#2f010a",
-    "--titlebarText": "#fc2cb7",
-    "--titlebarText2": "#b30074",
-    "--titlebarTextAlt": "#9c1c37",
-    "--sidebarBG": "#240400",
-    "--sidebarText": "#b30074",
-    "--sidebarButton": "#a3001b",
-    "--sidebarLink": "#f21c8e",
-    "--sortbarButton": "#b30074",
-    "--sortbarSearchBG": "#570038",
-    "--gridButton": "#f53dab",
-    "--footerBG": "#28011b",
-    "--pdfControlsBG": "#c70038",
-    "--dropdownBG": "rgba(51, 0, 33, 0.95)"
-}
 
 interface Props {
     rerender: () => void
@@ -42,30 +21,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const [activeDropdown, setActiveDropdown] = useState(false)
     const navigate = useNavigate()
 
-    useEffect(() => {
-        const savedHue = localStorage.getItem("siteHue")
-        const savedSaturation = localStorage.getItem("siteSaturation")
-        const savedLightness = localStorage.getItem("siteLightness")
-        if (savedHue) setSiteHue(Number(savedHue))
-        if (savedSaturation) setSiteSaturation(Number(savedSaturation))
-        if (savedLightness) setSiteLightness(Number(savedLightness))
-    }, [])
-
-    useEffect(() => {
-        if (typeof window === "undefined") return
-        for (let i = 0; i < Object.keys(colorList).length; i++) {
-            const key = Object.keys(colorList)[i]
-            const color = Object.values(colorList)[i]
-            document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, siteLightness))
-        }
-        setTimeout(() => {
-            props.rerender()
-        }, 100)
-        localStorage.setItem("siteHue", String(siteHue))
-        localStorage.setItem("siteSaturation", String(siteSaturation))
-        localStorage.setItem("siteLightness", String(siteLightness))
-    }, [siteHue, siteSaturation, siteLightness])
-
     const resetFilters = () => {
         setSiteHue(180)
         setSiteSaturation(100)
@@ -73,13 +28,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         setTimeout(() => {
             props.rerender()
         }, 100)
-    }
-
-    const getFilter = () => {
-        if (typeof window === "undefined") return
-        const bodyStyles = window.getComputedStyle(document.body)
-        const color = bodyStyles.getPropertyValue("--titlebarText2")
-        return functions.calculateFilter(color)
     }
 
     const titleClick = () => {

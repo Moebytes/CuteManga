@@ -3,29 +3,53 @@
     src: url("/assets/fonts/Mangaka.otf") format("opentype");
 }
 
+@font-face {
+    font-family: "GenEi M Gothic v2";
+    src: url("assets/fonts/GenEiMGothic2-Medium.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Honoka Shin Antique-Kaku";
+    src: url("assets/fonts/Honoka-Shin-Antique-Kaku_M.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Tsunagi Gothic Black";
+    src: url("assets/fonts/TsunagiGothic.ttf") format("truetype");
+}
+
 @titlebar-height: 70px;
 @pdf-controls-height: 40px;
 @sidebar-width: 400px;
 
 :root {
     --selection: rgba(255, 168, 233, 0.302);
-    --text: #fd3a9c;
-    --text-alt: #f141cb;
-    --background: #280119;
-    --titlebarBG: #2f010a;
-    --titlebarText: #fc2cb7;
-    --titlebarText2: #b30074;
-    --titlebarTextAlt: #9c1c37;
-    --sidebarBG: #240400;
-    --sidebarText: #b30074;
-    --sidebarButton: #a3001b;
-    --sidebarLink: #f21c8e;
-    --sortbarButton: #b30074;
-    --sortbarSearchBG: #570038;
-    --gridButton: #f53dab;
-    --footerBG: #28011b;
     --pdfControlsBG: #c70038;
-    --dropdownBG: rgba(51, 0, 33, 0.95);
+	--buttonBG: #ffd1de;
+	--textColor: #80183e;
+	--background: #ffffff;
+	--sidebarBG: #ffffff;
+	--navbarBG: #fce6f2;
+	--titleColor: #e36c94;
+	--buttonText: #ffffff;
+	--buttonBG2: #ff7ca5;
+	--gridBG: #fce6ed;
+	--searchBorder: #e6c6d8;
+	--sidebarButton: #fdc5db;
+}
+
+.dark {
+	--buttonBG: #331926;
+	--textColor: #fdfcfc;
+	--background: #291520;
+	--sidebarBG: #1f1117;
+	--navbarBG: #25131d;
+	--titleColor: #cf386d;
+	--buttonText: #000000;
+	--buttonBG2: #e34b76;
+	--gridBG: #1c0e16;
+	--searchBorder: #150510;
+	--sidebarButton: #331320;
 }
 
 * {
@@ -33,7 +57,7 @@
     padding: 0;
     box-sizing: border-box;
     scrollbar-width: thin;
-    scrollbar-color: var(--titlebarBG) var(--background);
+    scrollbar-color: var(--navbarBG) var(--background);
     user-select: none;
 }
 
@@ -103,7 +127,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--titlebarBG);
+    background: var(--navbarBG);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -112,23 +136,6 @@ body {
 
 ::-webkit-scrollbar-corner {
     background: rgba(0,0,0,0);
-  }
-
-
-.stroke-black() {
-    text-shadow: 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black,0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black,0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black,0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black;
-}
-
-.stroke-black-thin() {
-    text-shadow: 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black,0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black;
-}
-
-.stroke-black-thick() {
-    text-shadow: 0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black,0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black,0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black,0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black, 0 0 3px black;
-}
-
-.stroke-white() {
-    text-shadow: 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white,0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white,0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white,0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white;
 }
 
 input[type="search"]::-webkit-search-decoration,
