@@ -63,7 +63,11 @@ Manga
 
 The name of every file in the folders should be "Manga Name (volume number)". 
 
-You need to make sure that the Japanese manga has OCR text so that you can select and store the words you don't yet know. These are some tools that can help OCR your manga and convert them to PDF with selectable text:
+You have to make sure that the English and Japanese manga are synced with the same number of pages. You can use the "PDF" function in my application to dump images from a PDF, edit them until they are synced, and merge it back into a PDF: [Pixel Compressor](https://github.com/Moebytes/Pixel-Compressor). 
+
+Sometimes there will be "double pages", or a single page that actually contains two joined pages. You can use the "image" function in Pixel Compressor to split the double pages into singles.
+
+You also need to make sure that the Japanese manga has OCR text so that you can select and store the words you don't yet know. These are some tools that can help OCR your manga and convert them to PDF with selectable text:
 
 - [MangaOCR](https://github.com/kha-white/manga-ocr)
 - [Mokuro](https://github.com/kha-white/mokuro)
