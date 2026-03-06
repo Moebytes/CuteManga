@@ -4,6 +4,6 @@ node_modules
 dist
 json/database.js
 json/database-hidden.js
-json/database_backup.js
-json/database-hidden_backup.js
+json/database2.js
+json/database-hidden2.js
 dump.rdb

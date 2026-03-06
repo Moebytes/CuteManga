@@ -29,7 +29,7 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setTimeout(() => {
-            functions.dragScroll(enableDrag)
+            //functions.dragScroll(enableDrag)
         }, 100)
     }, [enableDrag, history])
 

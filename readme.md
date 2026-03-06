@@ -1,57 +1,73 @@
-# Cutemanga.moe
+# CuteManga
 
-Cutemanga is a manga viewer where you can read manga with selectable text (OCR) with a dictionary extension like Yomichan. It is a fun way to study Japanese. The manga is 
-generated with [MangaOCR](https://github.com/kha-white/manga-ocr), and specifically we use [Mokuro](https://github.com/kha-white/mokuro) 
-and [Mokuro2Pdf](https://github.com/Kartoffel0/Mokuro2Pdf) scripts to OCR the manga and convert them to PDF files.
+<img src="assets/images/readme.png">
 
-We have a custom PDF viewer which is explained in more detail below.
+CuteManga is a web interface to study Japanese in a funner way by reading your favorite manga.
 
-<img src="assets/images/about.png">
+You are responsible for filling it with your own content (covers, english manga, japanese manga with OCR text, and manga info).
 
-### Switching to English
+CuteManga has many features to make your learning experience easier, such as a PDF viewer with a toggle to switch between the japanese and english version of the manga to reference the translations as you study. 
 
-You can quickly switch to an English-translated version of the manga to check that you are understanding it correctly. Since Google Translate
-is very poor at translating vertical text, it often yields very unnatural/nonsensical dialogue, so it is better to refer a humanly-translated version 
-instead.
+You can also toggle between top-to-bottom and right-to-left reading modes.
 
-<img src="assets/images/switchingtoenglish.png">
+### Shortcuts
 
-### Reading Direction
+- Space: Switch between Japanese/English
 
-You can change the reading direction between top to bottom (most common), or right to left, which is how manga are traditionally read.
+### Design
 
-<img src="assets/images/readingdirection.png">
+Our design is available here: https://www.figma.com/design/T7EKhOdEwmeunR4V1QOGHT/CuteManga
 
-### Official Website
+*New design is wip
 
-Support the artist/publisher by buying the manga/anime from their website (a link is provided). 
+### Effective Learning
 
-<img src="assets/images/officialwebsite.png">
+To make effective use of this resource, you should at least know Hiragana, Katakana, and basic grammar. 
 
-### Tech Stack
+You should use [Anki](https://apps.ankiweb.net/) with the AnkiConnect extension and [Yomitan](https://yomitan.wiki/). In your Yomitan settings, enable the Anki integration so that you can add any words you don't know yet into an Anki deck for studying. 
 
-- Languages: Typescript, LESS, HTML
-- Front-end: React 
-- Bundler: Webpack
+Writing down the Kanji will make it easier to memorize them. You can use any note-taking app for this, but I use [Notability](https://notability.com/) on the ipad.
 
-### Hosting
+### Installation
 
 First install Node.js if you don't have it already. 
 
 https://nodejs.org/en/
 
-To reduce costs, the whole "database" is stored in a single `database.js` file instead of using a 
-real database. This works for me because I expect the content library to get that big.
+The whole "database" is stored in the `database.js` file instead of using a real database for easy editing.
 
-You can look at the `database.example.js` to see the structure of the database and populate it on your own.
+You can look at the `database.example.js` to see the structure of the database.
 
-Clone the code from this repository and then install dependencies with `npm install`. \
+Clone the code from this repository and then install dependencies with `npm install`. 
+
 Start the web server with `npm start`. 
 
-All the web server does is load the `index.html` file, there is no real backend so this can be hosted as a static 
-website. 
+Finally edit the pathname for the route `/Manga/*` in `server.ts` to the location of the manga folder on your hard drive.
 
-To load files from your local hard drive edit the pathname for the route `/Manga/*` in `server.tsx`.
+### File Structure
 
-### Anime Site
-- [Cuteanime.moe](https://github.com/Moebytes/Cuteanime)
+The interface expects the following filesystem structure:
+
+```
+Manga
+├── Manga Name 1
+│   ├── English (PDF volumes)
+│   ├── Japanese (PDF volumes)
+│   └── Covers (JPG covers)
+├── Manga Name 2
+│   ├── English (PDF volumes)
+│   ├── Japanese (PDF volumes)
+│   └── Covers (JPG covers)
+└── etc.
+```
+
+The name of every file in the folders should be "Manga Name (volume number)". 
+
+You need to make sure that the Japanese manga has OCR text so that you can select and store the words you don't yet know. These are some tools that can help OCR your manga and convert them to PDF with selectable text:
+
+- [MangaOCR](https://github.com/kha-white/manga-ocr)
+- [Mokuro](https://github.com/kha-white/mokuro)
+- [Mokuro2Pdf](https://github.com/Kartoffel0/Mokuro2Pdf)
+
+### Anime Version
+- [CuteAnime](https://github.com/Moebytes/CuteAnime)
