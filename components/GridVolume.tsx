@@ -1,8 +1,5 @@
-import React, {useContext, useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext} from "../Context"
-import functions from "../structures/Functions"
+import React, {useState, useRef} from "react"
+import {useNavigate} from "react-router-dom"
 import "./styles/gridvolume.less"
 
 interface Props {
@@ -12,11 +9,10 @@ interface Props {
 }
 
 const GridVolume: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const [drag, setDrag] = useState(false)
     const [hover, setHover] = useState(false)
     const imageRef = useRef<HTMLImageElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
         if (!imageRef.current) return
@@ -44,11 +40,11 @@ const GridVolume: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const mouseDown = (event: React.MouseEvent<HTMLElement>) => {
+    const mouseDown = () => {
         setDrag(false)
     }
 
-    const mouseMove = (event: React.MouseEvent<HTMLElement>) => {
+    const mouseMove = () => {
         setDrag(true)
     }
 
@@ -57,7 +53,7 @@ const GridVolume: React.FunctionComponent<Props> = (props) => {
             if (event.metaKey || event.ctrlKey || event.button == 1) {
                 return
             } else {
-                history.push(`/manga/${props.id}/${props.num}`)
+                navigate(`/manga/${props.id}/${props.num}`)
             }
         }
     }
@@ -65,8 +61,10 @@ const GridVolume: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="grid-volume">
             <div className="grid-volume-container">
-                <div className="grid-volume-img-container" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
-                    <img className="grid-volume-img" src={props.img} ref={imageRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}/>
+                <div className="grid-volume-img-container" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} 
+                onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
+                    <img className="grid-volume-img" src={props.img} ref={imageRef} onMouseMove={(event) => imageAnimation(event)} 
+                    onMouseLeave={() => cancelImageAnimation()}/>
                 </div>
                 <div className={`grid-volume-text-container ${!hover ? "hide-grid-volume-text" : ""}`}>
                     <span className="grid-volume-text">Volume {props.num}</span>

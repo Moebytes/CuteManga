@@ -1,7 +1,7 @@
 {
-    "short_name": "cutemanga.moe",
-    "name": "Cutemanga.moe",
-    "description": "Cutemanga is a website where you can read various manga with selectable text (OCR). It is a fun way to study japanese!",
+    "short_name": "cutemanga",
+    "name": "CuteManga",
+    "description": "Learn Japanese by reading manga!",
     "icons": [
       {
         "src": "assets/icons/favicon.png",

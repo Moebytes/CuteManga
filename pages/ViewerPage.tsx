@@ -1,15 +1,14 @@
-import React, {useEffect, useContext, useReducer, useState} from "react"
-import {EnableDragContext} from "../Context"
+import React, {useEffect, useState} from "react"
+import {useLayoutActions} from "../store"
 import PDFControls from "../components/PDFControls"
 import PDFRenderer from "../components/PDFRenderer"
-import functions from "../structures/Functions"
 
 interface Props {
     match?: any
 }
 
-const ViewerPage: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+const ViewerPage: React.FunctionComponent<Props> = () => {
+    const {setEnableDrag} = useLayoutActions()
     const [source, setSource] = useState(null) as any
 
     useEffect(() => {

@@ -1,22 +1,21 @@
-import React, {useEffect, useContext, useReducer, useState} from "react"
-import {EnableDragContext} from "../Context"
+import React, {useEffect, useReducer} from "react"
+import {useLayoutActions} from "../store"
 import TitleBar from "../components/TitleBar"
 import SideBar from "../components/SideBar"
-import Sortbar from "../components/Sortbar"
+import Sortbar from "../components/SortBar"
 import MangaGrid from "../components/MangaGrid"
 import Footer from "../components/Footer"
-import DonationDialog from "../dialogs/DonationDialog"
 
-const HomePage: React.FunctionComponent = (props) => {
+const HomePage: React.FunctionComponent = () => {
+    const {setEnableDrag} = useLayoutActions()
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+
     useEffect(() => {
         document.title = "CuteManga: Read Manga with OCR text"
     }, [])
 
     return (
         <>
-        <DonationDialog/>
         <TitleBar rerender={forceUpdate}/>
         <div className="body">
             <SideBar/>

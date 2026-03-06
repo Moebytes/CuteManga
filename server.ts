@@ -20,14 +20,15 @@ app.use(express.static(path.join(__dirname, "./public")))
 app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
 app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
-app.get("/Manga/*", function(req, res, next) {
+app.get("/Manga/{*path}", function(req, res, next) {
   if (req.path.includes("/manga")) return next()
   res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+  res.setHeader("Accept-Ranges", "bytes")
   res.header("Access-Control-Allow-Origin", "*")
+
+  let pathname = `/Volumes/Files/${decodeURIComponent(req.path.slice(1)).replaceAll(":", "%3A")}`
+  const contentLength = fs.statSync(pathname).size
   try {
-    let pathname = `/Volumes/Files/${decodeURIComponent(req.path.slice(1)).replaceAll(":", "%3A")}`
-    const body = fs.readFileSync(pathname)
-    const contentLength = body.length
     if (req.headers.range) {
       const parts = req.headers.range.replace(/bytes=/, "").split("-")
       const start = parseInt(parts[0])
@@ -37,18 +38,18 @@ app.get("/Manga/*", function(req, res, next) {
         "Accept-Ranges": "bytes",
         "Content-Length": end - start + 1
       })
-      const stream = Readable.from(body.slice(start, end + 1))
+      const stream = fs.createReadStream(pathname, {start, end})
       return stream.pipe(res)
     }
     res.setHeader("Content-Length", contentLength)
-    res.status(200).end(body)
+    return fs.createReadStream(pathname).pipe(res)
   } catch (e) {
     console.log(e)
     res.status(400).end()
   }
 })
 
-app.get("/*", function(req, res) {
+app.get("/{*path}", function(req, res) {
     res.setHeader("Content-Type", mime.getType(req.path) ?? "")
     res.header("Access-Control-Allow-Origin", "*")
     const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
@@ -56,7 +57,8 @@ app.get("/*", function(req, res) {
 })
 
 const run = async () => {
-  app.listen(process.env.PORT || 8080, () => console.log("Started the website server!"))
+  const port = process.env.PORT || 8080
+  app.listen(port, () => console.log(`Started the web server! http://localhost:${port}`))
   dbFunctions.logGenres()
 }
 

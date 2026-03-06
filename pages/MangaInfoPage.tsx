@@ -1,13 +1,11 @@
-import React, {useEffect, useContext, useReducer, useState} from "react"
-import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
-import {EnableDragContext} from "../Context"
+import React, {useEffect, useReducer} from "react"
+import {useNavigate, useParams} from "react-router-dom"
+import {useLayoutActions} from "../store"
 import TitleBar from "../components/TitleBar"
 import SideBar from "../components/SideBar"
-import Sortbar from "../components/Sortbar"
 import Footer from "../components/Footer"
 import MangaInfo from "../components/MangaInfo"
 import VolumeGrid from "../components/VolumeGrid"
-import DonationDialog from "../dialogs/DonationDialog"
 import functions from "../structures/Functions"
 import database from "../json/database"
 import hiddenDatabase from "../json/database-hidden"
@@ -17,25 +15,24 @@ interface Props {
 }
 
 const MangaInfoPage: React.FunctionComponent<Props> = (props) => {
+    const {setEnableDrag} = useLayoutActions()
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const history = useHistory()
+    const navigate = useNavigate()
+    const {id} = useParams<{id: string}>()
 
-    const id = props.match.params.id
     let info = database.find((m) => m.id === id)
     if (!info) info = hiddenDatabase.find((m) => m.id === id)
     if (!info) {
-        history.push(`/404`)
+        navigate(`/404`)
         return null
     }
 
     useEffect(() => {
-        document.title = `${functions.toProperCase(id.replaceAll("-", " "))}`
-    }, [])
+        if (id) document.title = `${functions.toProperCase(id.replaceAll("-", " "))}`
+    }, [id])
 
     return (
         <>
-        <DonationDialog/>
         <TitleBar rerender={forceUpdate} hidden={info.hidden}/>
         <div className="body">
             <SideBar hidden={info.hidden}/>

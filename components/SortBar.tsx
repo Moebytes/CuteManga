@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext, SidebarSortContext, SearchContext, SearchFlagContext, SortContext, ReverseContext, MobileContext} from "../Context"
+import React, {useEffect} from "react"
+import {useLayoutActions, useFlagActions, useSearchSelector, 
+useSearchActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import date from "../assets/icons/date.png"
 import alphabetic from "../assets/icons/alphabetic.png"
@@ -16,14 +15,11 @@ interface Props {
 }
 
 const SortBar: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {sidebarSort, setSidebarSort} = useContext(SidebarSortContext)
-    const {sort, setSort} = useContext(SortContext)
-    const {reverse, setReverse} = useContext(ReverseContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const history = useHistory()
+    const {mobile} = useLayoutSelector()
+    const {setEnableDrag} = useLayoutActions()
+    const {search, sidebarSort, sort, reverse} = useSearchSelector()
+    const {setSearch, setSort, setReverse, setSidebarSort} = useSearchActions()
+    const {setSearchFlag} = useFlagActions()
 
     useEffect(() => {
         const savedSort = localStorage.getItem("sort")
@@ -69,14 +65,15 @@ const SortBar: React.FunctionComponent<Props> = (props) => {
                         <span className="sortbar-button-text">Bookmarks</span>
                     </span>
                 </button> : null}
-                <button className="sortbar-button" onClick={() => setReverse((prev: boolean) => !prev)}>
+                <button className="sortbar-button" onClick={() => setReverse(!reverse)}>
                     <span className="sortbar-button-hover">
                         <img className="sortbar-button-img" src={reverse ? sortReverseIcon : sortIcon} style={{filter: getFilter()}}/>
                     </span>
                 </button>
             </div> : null}
             <div className="sortbar-search-container" onMouseEnter={() => setEnableDrag(false)}>
-                <input className="sortbar-search" type="search" placeholder="Manga name..." spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)}/>
+                <input className="sortbar-search" type="search" placeholder="Manga name..." spellCheck="false" 
+                value={search} onChange={(event) => setSearch(event.target.value)}/>
                 <button className="sortbar-search-button" onClick={() => setSearchFlag(true)}>
                     <span className="sortbar-search-button-hover">
                         <img className="sortbar-search-button-img" src={searchIcon}/>

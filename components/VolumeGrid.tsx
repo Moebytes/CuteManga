@@ -1,8 +1,4 @@
-import React, {useContext, useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext} from "../Context"
-import functions from "../structures/Functions"
+import React from "react"
 import GridVolume from "./GridVolume"
 import "./styles/volumegrid.less"
 
@@ -29,9 +25,6 @@ interface Props {
 }
 
 const VolumeGrid: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const history = useHistory()
-
     const generateJSX = () => {
         let jsx = [] as any
         const volumes = props.info.volumes

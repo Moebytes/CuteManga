@@ -1,18 +1,18 @@
-import React, {useContext, useEffect} from "react"
-import {PageContext, HorizontalContext} from "../Context"
+import React, {useEffect} from "react"
+import {useReadingSelector, useReadingActions} from "../store"
 import {Page} from "react-pdf"
 import {useInView} from "react-intersection-observer"
 
 const WrappedPage = ({pageNumber, width, loading, scale, id, rootRef}) => {
-    const {page, setPage} = useContext(PageContext)
-    const {horizontal, setHorizontal} = useContext(HorizontalContext)
+    const {page, horizontal} = useReadingSelector()
+    const {setPage} = useReadingActions()
     const {ref, inView} = useInView({root: rootRef?.current || null, threshold: 0.2})
 
     useEffect(() => {
         if (inView) {
             if (horizontal) {
-                if (page !== pageNumber - 1) {
-                    setPage(pageNumber - 1)
+                if (Number(page) !== pageNumber - 1) {
+                    setPage(String(pageNumber - 1))
                     const pageMap = JSON.parse(localStorage.getItem("pageMap") || "{}")
                     pageMap[id] = pageNumber - 1
                     localStorage.setItem("pageMap", JSON.stringify(pageMap))

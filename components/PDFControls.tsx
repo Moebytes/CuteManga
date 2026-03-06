@@ -1,18 +1,14 @@
-import React, {useContext, useEffect, useState} from "react"
-import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext, PageContext, ZoomContext, NumPagesFlagContext, MobileContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext,
-ShowEnContext, HorizontalContext, ShowThumbnailsContext, NavigateFlagContext, InvertContext} from "../Context"
+import React, {useEffect, useState} from "react"
+import {useNavigate} from "react-router-dom"
+import {useLayoutSelector, useLayoutActions, useReadingSelector, useReadingActions, useThemeSelector, 
+useThemeActions, useFlagSelector, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import back from "../assets/icons/back.png"
 import bookmark from "../assets/icons/bookmark.png"
 import unbookmark from "../assets/icons/unbookmark.png"
-import comment from "../assets/icons/comment.png"
-import dictionary from "../assets/icons/dictionary.png"
 import englishToJapanese from "../assets/icons/englishToJapanese.png"
 import japaneseToEnglish from "../assets/icons/japaneseToEnglish.png"
 import hamburger from "../assets/icons/hamburger.png"
-import info from "../assets/icons/info.png"
 import nextPage from "../assets/icons/nextPage.png"
 import prevPage from "../assets/icons/prevPage.png"
 import rightToLeft from "../assets/icons/rightToLeft.png"
@@ -56,24 +52,19 @@ interface Props {
 }
 
 const PDFControls: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
+    const {mobile} = useLayoutSelector()
+    const {setEnableDrag} = useLayoutActions()
+    const {page, zoom, horizontal, showEn, showThumbnails, invert} = useReadingSelector()
+    const {setPage, setZoom, setHorizontal, setShowEn, setShowThumbnails, setInvert} = useReadingActions()
+    const {numPagesFlag, navigateFlag} = useFlagSelector()
+    const {setNavigateFlag} = useFlagActions()
     const [lastPage, setLastPage] = useState("1")
-    const {page, setPage} = useContext(PageContext)
     const [lastZoom, setLastZoom] = useState("100%")
-    const {zoom, setZoom} = useContext(ZoomContext)
-    const {numPagesFlag, setNumPagesFlag} = useContext(NumPagesFlagContext)
-    const {horizontal, setHorizontal} = useContext(HorizontalContext)
-    const {showEn, setShowEn} = useContext(ShowEnContext)
-    const {showThumbnails, setShowThumbnails} = useContext(ShowThumbnailsContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {navigateFlag, setNavigateFlag} = useContext(NavigateFlagContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {invert, setInvert} = useContext(InvertContext)
     const [colorDropdown, setColorDropdown] = useState(false)
     const [saved, setSaved] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         const savedThumbnails = localStorage.getItem("showThumbnails")
@@ -102,9 +93,9 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
         setTimeout(() => {
             // props.rerender()
         }, 100)
-        localStorage.setItem("siteHue", siteHue)
-        localStorage.setItem("siteSaturation", siteSaturation)
-        localStorage.setItem("siteLightness", siteLightness)
+        localStorage.setItem("siteHue", String(siteHue))
+        localStorage.setItem("siteSaturation", String(siteSaturation))
+        localStorage.setItem("siteLightness", String(siteLightness))
     }, [siteHue, siteSaturation, siteLightness])
 
     const resetFilters = () => {
@@ -163,7 +154,7 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerBack = () => {
-        history.push(`/manga/${props.id}`)
+        navigate(`/manga/${props.id}`)
     }
 
     const triggerSupport = () => {
@@ -260,7 +251,7 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="pdf-controls" onMouseEnter={() => setEnableDrag(true)}>
             <div className="pdf-controls-box">
-                {!mobile ? <img className="pdf-controls-icon-small" src={hamburger} onClick={() => setShowThumbnails((prev: boolean) => !prev)}/> : null}
+                {!mobile ? <img className="pdf-controls-icon-small" src={hamburger} onClick={() => setShowThumbnails(!showThumbnails)}/> : null}
                 <div className="pdf-controls-page-container">
                     <span className="pdf-controls-page-text">Page:</span>
                     <input className="pdf-controls-page-input" type="number" spellCheck={false} value={page} onChange={(event) => setPage(event.target.value)} onBlur={() => updatePage()} onMouseEnter={() => setEnableDrag(false)}/>
@@ -280,10 +271,10 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
             </div> : null}
             <div className="pdf-controls-box">
                 <img className="pdf-controls-icon" src={back} onClick={triggerBack}/>
-                <img className="pdf-controls-icon" src={invert ? invertOnIcon : invertIcon} onClick={() => setInvert((prev: boolean) => !prev)}/>
+                <img className="pdf-controls-icon" src={invert ? invertOnIcon : invertIcon} onClick={() => setInvert(!invert)}/>
                 {!mobile ? <img className="pdf-controls-icon" src={saved ? unbookmark : bookmark} onClick={save}/> : null}
                 {/* <img className="pdf-controls-icon" src={dictionary}/> */}
-                <img className="pdf-controls-icon" src={showEn ? englishToJapanese : japaneseToEnglish} onClick={() => setShowEn((prev: boolean) => !prev)}/>
+                <img className="pdf-controls-icon" src={showEn ? englishToJapanese : japaneseToEnglish} onClick={() => setShowEn(!showEn)}/>
                 {!mobile ? <img className="pdf-controls-icon" src={support} onClick={triggerSupport}/> : null}
                 <img className="pdf-controls-icon" src={color} onClick={() => setColorDropdown((prev) => !prev)}/>
                 {/* <img className="pdf-controls-icon" src={comment}/> */}

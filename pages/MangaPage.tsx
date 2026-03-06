@@ -1,20 +1,16 @@
-import React, {useEffect, useContext, useReducer, useState} from "react"
-import {EnableDragContext} from "../Context"
+import React, {useEffect} from "react"
+import {useParams} from "react-router-dom"
+import {useLayoutActions} from "../store"
 import PDFControls from "../components/PDFControls"
 import PDFRenderer from "../components/PDFRenderer"
 import functions from "../structures/Functions"
 
-interface Props {
-    match?: any
-}
-
-const MangaPage: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const id = props.match.params.id
-    const num = props.match.params.num
+const MangaPage: React.FunctionComponent = () => {
+    const {setEnableDrag} = useLayoutActions()
+    const {id, num} = useParams<{id: string, num: string}>()
 
     useEffect(() => {
-        document.title = `${functions.toProperCase(id.replaceAll("-", " "))} ${num}`
+        if (id) document.title = `${functions.toProperCase(id.replaceAll("-", " "))} ${num}`
         document.body.style.overflowY = "hidden"
         return () => {
             document.body.style.overflowY = "auto"
@@ -23,9 +19,9 @@ const MangaPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <PDFControls id={id} num={num}/>
+        <PDFControls id={id ?? ""} num={Number(num ?? 0)}/>
         <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-            <PDFRenderer id={id} num={num}/>
+            <PDFRenderer id={id ?? ""}num={Number(num ?? 0)}/>
         </div>
         </>
     )

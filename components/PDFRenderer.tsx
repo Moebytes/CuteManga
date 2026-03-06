@@ -1,19 +1,17 @@
-import React, {useContext, useEffect, useState, useRef, useMemo, createRef, forwardRef} from "react"
-import {SizeMe} from "react-sizeme"
-import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext, PageContext, ZoomContext, NumPagesFlagContext, MobileContext,
-ShowEnContext, HorizontalContext, ShowThumbnailsContext, NavigateFlagContext, InvertContext} from "../Context"
-import {Document, Page, pdfjs, PDFPageProxy} from "react-pdf"
-import functions from "../structures/Functions"
+import React, {useEffect, useState, useRef, useMemo, createRef, forwardRef} from "react"
+import {useLayoutSelector, useReadingSelector, useReadingActions, 
+useFlagSelector, useFlagActions} from "../store"
+import {useNavigate} from "react-router-dom"
+import {Document, Page, pdfjs} from "react-pdf"
 import WrappedPage from "./WrappedPage"
-import * as pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.entry"
 import database from "../json/database"
 import hiddenDatabase from "../json/database-hidden"
-import axios from "axios"
 import "./styles/pdfrenderer.less"
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.js",
+  import.meta.url
+).toString()
 
 const Placeholder = ({width}) => {
     const a4AspectRatio = 1.4142
@@ -33,10 +31,13 @@ const PDFPage = forwardRef(function PDFPage({visible, pageIndex, width, scale, i
       )
 })
 
-const PDFThumbnail = forwardRef(function PDFThumbnail({pageNumber, width, className, key, onRenderSuccess, style, loading, noData, renderAnnotationLayer, renderTextLayer, onClick}: any, ref: any) {  
+const PDFThumbnail = forwardRef(function PDFThumbnail({pageNumber, width, className, key, onRenderSuccess, style, 
+    loading, noData, renderAnnotationLayer, renderTextLayer, onClick}: any, ref: any) {  
     return (
         <div ref={ref} data-page-index={pageNumber - 1} style={style}>
-          <Page className={className} key={key} onRenderSuccess={onRenderSuccess} width={width} pageNumber={pageNumber} loading={loading} noData={noData} renderAnnotationLayer={renderAnnotationLayer} renderTextLayer={renderTextLayer} onClick={onClick}/>
+          <Page className={className} key={key} onRenderSuccess={onRenderSuccess} width={width} pageNumber={pageNumber} 
+          loading={loading} noData={noData} renderAnnotationLayer={renderAnnotationLayer} renderTextLayer={renderTextLayer} 
+          onClick={onClick}/>
         </div>
       )
 })
@@ -48,28 +49,23 @@ interface Props {
 }
 
 const PDFRenderer: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {page, setPage} = useContext(PageContext)
-    const {zoom, setZoom} = useContext(ZoomContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {numPagesFlag, setNumPagesFlag} = useContext(NumPagesFlagContext)
+    const {mobile} = useLayoutSelector()
+    const {page, zoom, horizontal, showEn, showThumbnails, invert} = useReadingSelector()
+    const {setShowEn} = useReadingActions()
+    const {numPagesFlag} = useFlagSelector()
+    const {setNumPagesFlag, setNavigateFlag} = useFlagActions()
     const [numPagesJA, setNumPagesJA] = React.useState(0)
     const [numPagesEN, setNumPagesEN] = React.useState(0)
     const [numPagesThumb, setNumPagesThumb] = React.useState(0)
     const [enPDF, setEnPDF] = useState(null) as any
     const [jaPDF, setJaPDF] = useState(null) as any
-    const rootRef = useRef(null) as any
     const [observer, setObserver] = useState(null) as any
     const [visibilitiesJA, setVisibilitiesJA] = useState([]) as any
     const [visibilitiesEN, setVisibilitiesEN] = useState([]) as any
-    const {showEn, setShowEn} = useContext(ShowEnContext)
-    const {horizontal, setHorizontal} = useContext(HorizontalContext)
-    const {showThumbnails, setShowThumbnails} = useContext(ShowThumbnailsContext)
-    const {navigateFlag, setNavigateFlag} = useContext(NavigateFlagContext)
-    const {invert, setInvert} = useContext(InvertContext)
     const [thumbsRenderedJA, setThumbsRenderedJA] = useState(0) as any
     const [thumbsRenderedEN, setThumbsRenderedEN] = useState(0) as any
-    const history = useHistory()
+    const rootRef = useRef(null) as any
+    const navigate = useNavigate()
 
     const id = `${props.id} ${props.num}`
 
@@ -80,9 +76,9 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
         }
         let manga = database.find((m) => m.id === props.id)
         if (!manga) manga = hiddenDatabase.find((m) => m.id === props.id)
-        if (!manga) return history.push(`/404`)
+        if (!manga) return navigate(`/404`)
         const volume = manga.volumes.find((v: any) => v.volumeNumber === Number(props.num))
-        if (!volume) return history.push(`/404`)
+        if (!volume) return navigate(`/404`)
         setJaPDF(volume.japaneseSource)
         setEnPDF(volume.englishSource)
     }
@@ -99,14 +95,14 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
         const keyDown = (event: KeyboardEvent) => {
             if (event.code === "Space") {
                 event.preventDefault()
-                setShowEn((prev: boolean) => !prev)
+                setShowEn(!showEn)
             }
         }
         document.addEventListener("keydown", keyDown)
         return () => {
             document.removeEventListener("keydown", keyDown)
         }
-    })
+    }, [showEn])
 
     const pageRefsJA = useMemo(() => {
         return Array.from(new Array(numPagesJA), () => createRef())
@@ -170,24 +166,6 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
         }
     }, [observer, pageRefsJA, pageRefsEN])
 
-    /*
-    useEffect(() => {
-        const elements = document.querySelectorAll("span")
-        const mouseEnter = () => setEnableDrag(false)
-        const mouseLeave = () => setEnableDrag(true)
-        elements.forEach((e) => {
-            e.addEventListener("mouseenter", mouseEnter)
-            e.addEventListener("mouseleave", mouseLeave)
-        })
-        return () => {
-            elements.forEach((e) => {
-                e.removeEventListener("mouseenter", mouseEnter)
-                e.removeEventListener("mouseleave", mouseLeave)
-            })
-        }
-    })*/
-
-
     const onLoadSuccessJA = async (pdf: any) => {
         setNumPagesJA(pdf.numPages)
         setNumPagesFlag(pdf.numPages)
@@ -214,10 +192,6 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
         setThumbsRenderedEN((prev: number) => prev + 1)
     }
 
-    const onLoadSuccessThumb = async (pdf: any) => {
-        setNumPagesThumb(pdf.numPages)
-    }
-
     const generateThumbnails = () => {
         if (mobile) return null
         const thumbsToRenderJA = Math.min(thumbsRenderedJA + 1, numPagesJA)
@@ -225,23 +199,33 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
         return (
             // @ts-ignore
             <div onClick={((e) => {showEn ? e.currentTarget.firstElementChild?.focus() : e.currentTarget.lastElementChild?.focus(); e.stopPropagation()})}>
-            <Document className={`pdf-thumbnail-container ${!showThumbnails || !showEn ? horizontal ? "thumbnail-hidden-horizontal" : "thumbnail-hidden" : ""} ${horizontal ? "thumbnail-horizontal" : ""}`} file={enPDF} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
+            <Document className={`pdf-thumbnail-container ${!showThumbnails || !showEn ? horizontal ? "thumbnail-hidden-horizontal" : 
+                "thumbnail-hidden" : ""} ${horizontal ? "thumbnail-horizontal" : ""}`} file={enPDF} noData="" loading="" 
+                options={{disableAutoFetch: true, disableStream: true}}>
                 {Array.from(new Array(thumbsToRenderEN), (el, index) => {
                     const rendering = thumbsToRenderEN === index + 1
                     const lastThumb = numPagesThumb === index + 1
                     const renderNextThumb = rendering && !lastThumb
                     return (
-                      <PDFThumbnail className={`pdf-thumbnail ${page === index + 1 ? "selected" : ""}`} width={100} key={`thumbEN_${index + 1}`} onRenderSuccess={() => renderNextThumb ? onRenderSuccessEN() : null} pageNumber={index + 1} loading="" noData="" renderAnnotationLayer={false} renderTextLayer={false} onClick={() => setNavigateFlag(index + 1)} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
+                      <PDFThumbnail className={`pdf-thumbnail ${Number(page) === index + 1 ? "selected" : ""}`} width={100} 
+                      key={`thumbEN_${index + 1}`} onRenderSuccess={() => renderNextThumb ? onRenderSuccessEN() : null} 
+                      pageNumber={index + 1} loading="" noData="" renderAnnotationLayer={false} renderTextLayer={false} 
+                      onClick={() => setNavigateFlag(index + 1)} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                     )
                 })}
             </Document>
-            <Document className={`pdf-thumbnail-container ${!showThumbnails || showEn ? horizontal ? "thumbnail-hidden-horizontal" : "thumbnail-hidden" : ""} ${horizontal ? "thumbnail-horizontal" : ""}`} file={jaPDF} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
+            <Document className={`pdf-thumbnail-container ${!showThumbnails || showEn ? horizontal ? "thumbnail-hidden-horizontal" : 
+                "thumbnail-hidden" : ""} ${horizontal ? "thumbnail-horizontal" : ""}`} file={jaPDF} noData="" loading="" 
+                options={{disableAutoFetch: true, disableStream: true}}>
                 {Array.from(new Array(thumbsToRenderJA), (el, index) => {
                     const rendering = thumbsToRenderJA === index + 1
                     const lastThumb = numPagesThumb === index + 1
                     const renderNextThumb = rendering && !lastThumb
                     return (
-                      <PDFThumbnail className={`pdf-thumbnail ${page === index + 1 ? "selected" : ""}`} width={100} key={`thumbJA_${index + 1}`} onRenderSuccess={() => renderNextThumb ? onRenderSuccessJA() : null} pageNumber={index + 1} loading="" noData="" renderAnnotationLayer={false} renderTextLayer={false} onClick={() => setNavigateFlag(index + 1)} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
+                      <PDFThumbnail className={`pdf-thumbnail ${Number(page) === index + 1 ? "selected" : ""}`} 
+                      width={100} key={`thumbJA_${index + 1}`} onRenderSuccess={() => renderNextThumb ? onRenderSuccessJA() : null} 
+                      pageNumber={index + 1} loading="" noData="" renderAnnotationLayer={false} renderTextLayer={false} 
+                      onClick={() => setNavigateFlag(index + 1)} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                     )
                 })}
             </Document>
@@ -263,7 +247,8 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (showThumbnails && horizontal) {
-            const thumbnailHeight = Array.from(document.querySelectorAll(".pdf-thumbnail-container")).reduce((p, c) => p.clientHeight > c.clientHeight ? p : c)?.clientHeight
+            const thumbnailHeight = Array.from(document.querySelectorAll(".pdf-thumbnail-container"))
+                .reduce((p, c) => p.clientHeight > c.clientHeight ? p : c)?.clientHeight
             if (!thumbnailHeight) return 
             document.querySelectorAll(".pdf-document").forEach((e: any) => {
                 e.style.marginTop = `${thumbnailHeight}px`
@@ -281,16 +266,17 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     }, [showThumbnails, horizontal])
 
     useEffect(() => {
-        const value = horizontal ? document.querySelector(".pdf-thumbnail")?.clientWidth : document.querySelector(".pdf-thumbnail")?.clientHeight 
+        const value = horizontal ? document.querySelector(".pdf-thumbnail")?.clientWidth : 
+            document.querySelector(".pdf-thumbnail")?.clientHeight 
         if (!value) return
         document.querySelectorAll(".pdf-thumbnail-container").forEach((e: any) => {
             if (horizontal) {
-                if (page > 6 && page < numPagesFlag - 6) {
-                    e.scrollLeft = -(Math.round(((page - 1) * (value + 13))) - ((value + 13) * 5))
+                if (Number(page) > 6 && Number(page) < numPagesFlag - 6) {
+                    e.scrollLeft = -(Math.round(((Number(page) - 1) * (value + 13))) - ((value + 13) * 5))
                 }
             } else {
-                if (page > 2 && page < numPagesFlag - 2) {
-                    e.scrollTop = (Math.round(((page - 1) * (value + 13)))) - ((value + 13) * 2)
+                if (Number(page) > 2 && Number(page) < numPagesFlag - 2) {
+                    e.scrollTop = (Math.round(((Number(page) - 1) * (value + 13)))) - ((value + 13) * 2)
                 }
             }
         })
@@ -306,18 +292,24 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className={`pdf-renderer drag ${horizontal ? "pdf-renderer-horizontal" : ""}`} ref={rootRef} style={{maxHeight: horizontal ? 773 : 1600, touchAction: horizontal ? "pan-x" : "pan-y"}} onClick={((e) => e.currentTarget.focus())}>
+        <div className={`pdf-renderer drag ${horizontal ? "pdf-renderer-horizontal" : ""}`} ref={rootRef} 
+        style={{maxHeight: horizontal ? 773 : 1600, touchAction: horizontal ? "pan-x" : "pan-y"}} 
+        onClick={((e) => e.currentTarget.focus())}>
             {generateThumbnails()}
-            <Document renderMode="svg" className={`pdf-document ${!showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""}`} file={enPDF} onLoadSuccess={onLoadSuccessEN} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
+            {enPDF && <Document renderMode="canvas" className={`pdf-document ${!showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""}`}  onLoadError={(e) => console.log(e)}
+            file={enPDF} key={enPDF} onLoadSuccess={onLoadSuccessEN} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
                 {visibilitiesEN.map((visible: boolean, index: number) => (
-                    <PDFPage id={id} className="pdf-page" ref={pageRefsEN[index]} key={`pageEN_${index + 1}`} pageIndex={index} visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}} rootRef={rootRef}/>
+                    <PDFPage id={id} className="pdf-page" ref={pageRefsEN[index]} key={`pageEN_${index + 1}`} pageIndex={index} rootRef={rootRef}
+                    visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                 ))}
-            </Document>
-            <Document renderMode="svg" className={`pdf-document ${showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""}`} file={jaPDF} onLoadSuccess={onLoadSuccessJA} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
+            </Document>}
+            {jaPDF && <Document renderMode="canvas" className={`pdf-document ${showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""}`} onLoadError={(e) => console.log(e)}
+            file={jaPDF} key={jaPDF} onLoadSuccess={onLoadSuccessJA} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
                 {visibilitiesJA.map((visible: boolean, index: number) => (
-                    <PDFPage id={id} className="pdf-page" ref={pageRefsJA[index]} key={`pageJA_${index + 1}`} pageIndex={index} visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}} rootRef={rootRef}/>
+                    <PDFPage id={id} className="pdf-page" ref={pageRefsJA[index]} key={`pageJA_${index + 1}`} pageIndex={index} rootRef={rootRef}
+                    visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                 ))}
-            </Document>
+            </Document>}
         </div>
     )
 }

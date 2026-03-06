@@ -1,10 +1,9 @@
-import React, {useContext, useEffect, useState, useReducer} from "react"
-import {useHistory} from "react-router-dom"
-import {EnableDragContext, SearchContext, SearchFlagContext, SidebarSortContext, GenreContext, MobileContext} from "../Context"
+import React, {useEffect, useState} from "react"
+import {useNavigate, useLocation} from "react-router-dom"
+import {useLayoutActions, useFlagActions, useSearchSelector, useSearchActions, useLayoutSelector} from "../store"
 import recent from "../assets/icons/recent.png"
 import genreIcon from "../assets/icons/genre.png"
 import searchIcon from "../assets/icons/search.png"
-import {HashLink as Link} from "react-router-hash-link"
 import dbFunctions from "../structures/DatabaseFunctions"
 import functions from "../structures/Functions"
 import "./styles/sidebar.less"
@@ -14,14 +13,14 @@ interface Props {
 }
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {sidebarSort, setSidebarSort} = useContext(SidebarSortContext)
-    const {genre, setGenre} = useContext(GenreContext)
-    const {mobile, setMobile} = useContext(MobileContext)
+    const {search, sidebarSort} = useSearchSelector()
+    const {setSearch, setGenre, setSidebarSort} = useSearchActions()
+    const {mobile} = useLayoutSelector()
+    const {setEnableDrag} = useLayoutActions()
+    const {setSearchFlag} = useFlagActions()
     const [showSearchBar, setShowSearchBar] = useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const getFilter = () => {
         if (typeof window === "undefined") return
@@ -63,13 +62,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (sidebarSort === "recent") {
             const recent = props.hidden ? dbFunctions.getRecentHidden() : dbFunctions.getRecent()
             for (let i = 0; i < recent.length; i++) {
-                jsx.push(<span className="sidebar-link" onClick={() => history.push(`/manga/${recent[i].id}`)}>{recent[i].title}</span>)
+                jsx.push(<span className="sidebar-link" onClick={() => navigate(`/manga/${recent[i].id}`)}>{recent[i].title}</span>)
             }
         } else if (sidebarSort === "genre") {
             const genres = dbFunctions.getGenres()
             for (let i = 0; i < genres.length; i++) {
                 const click = () => {
-                    if (history.location.pathname !== "/" && history.location.pathname !== "/manga" && history.location.pathname !== "/home") history.push("/manga")
+                    if (location.pathname !== "/" && location.pathname !== "/manga" && location.pathname !== "/home") navigate("/manga")
                     setGenre(genres[i])
                 }
                 jsx.push(<span className="sidebar-link" onClick={click}>{genres[i]}</span>)
@@ -82,7 +81,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const searchClick = () => {
-        if (history.location.pathname !== "/" && history.location.pathname !== "/manga" && history.location.pathname !== "/home") history.push("/manga")
+        if (location.pathname !== "/" && location.pathname !== "/manga" && location.pathname !== "/home") navigate("/manga")
         setSearchFlag(true)
     }
 
@@ -113,7 +112,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {showSearchBar ?
                     <div className="sidebar-search-container" onMouseEnter={() => setEnableDrag(false)}>
-                        <input className="sidebar-search" type="search" placeholder="Manga name..." spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)}/>
+                        <input className="sidebar-search" type="search" placeholder="Manga name..." spellCheck="false" value={search} 
+                        onChange={(event) => setSearch(event.target.value)}/>
                         <button className="sidebar-search-button" onClick={searchClick}>
                             <span className="sidebar-search-button-hover">
                                 <img className="sidebar-search-button-img" src={searchIcon}/>

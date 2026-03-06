@@ -1,7 +1,6 @@
 import GifEncoder from "gif-encoder"
 import pixels from "image-pixels"
 import path from "path"
-import axios from "axios"
 import fileType from "magic-bytes.js"
 import gifFrames from "gif-frames"
 import {hexToRgb, Color, Solver} from "./Color.ts"

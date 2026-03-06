@@ -1,8 +1,6 @@
-import React, {useContext, useEffect, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext, MobileContext} from "../Context"
-import functions from "../structures/Functions"
+import React, {useEffect, useState, useRef} from "react"
+import {useLayoutSelector} from "../store"
+import {useNavigate} from "react-router-dom"
 import read from "../assets/icons/read.png"
 import bookmark from "../assets/icons/bookmark.png"
 import unbookmark from "../assets/icons/unbookmark.png"
@@ -16,13 +14,12 @@ interface Props {
 }
 
 const GridManga: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {mobile, setMobile} = useContext(MobileContext)
+    const {mobile} = useLayoutSelector()
     const [drag, setDrag] = useState(false)
     const [hover, setHover] = useState(false)
     const [saved, setSaved] = useState(false)
     const imageRef = useRef<HTMLImageElement>(null)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
         if (!imageRef.current) return
@@ -68,11 +65,11 @@ const GridManga: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const mouseDown = (event: React.MouseEvent<HTMLElement>) => {
+    const mouseDown = () => {
         setDrag(false)
     }
 
-    const mouseMove = (event: React.MouseEvent<HTMLElement>) => {
+    const mouseMove = () => {
         setDrag(true)
     }
 
@@ -81,7 +78,7 @@ const GridManga: React.FunctionComponent<Props> = (props) => {
             if (event.metaKey || event.ctrlKey || event.button == 1) {
                 return
             } else {
-                history.push(`/manga/${props.id}`)
+                navigate(`/manga/${props.id}`)
             }
         }
     }
@@ -118,7 +115,7 @@ const GridManga: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
                 {!mobile ? <div className="grid-manga-button-container">
-                    <button className="grid-manga-button" onClick={() => history.push(`/manga/${props.id}`)} onAuxClick={onClick}>
+                    <button className="grid-manga-button" onClick={() => navigate(`/manga/${props.id}`)} onAuxClick={onClick}>
                         <span className="grid-manga-button-hover">
                             <img className="grid-manga-button-img" src={read}/>
                             <span className="grid-manga-button-text">Read</span>
