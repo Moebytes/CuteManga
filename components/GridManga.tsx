@@ -1,9 +1,9 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useLayoutSelector} from "../store"
 import {useNavigate} from "react-router-dom"
-import read from "../assets/icons/read.png"
-import bookmark from "../assets/icons/bookmark.png"
-import unbookmark from "../assets/icons/unbookmark.png"
+import ReadIcon from "../assets/svg/read.svg"
+import BookmarkIcon from "../assets/svg/bookmark.svg"
+import UnbookmarkIcon from "../assets/svg/unbookmark.svg"
 import "./styles/gridmanga.less"
 
 interface Props {
@@ -117,13 +117,15 @@ const GridManga: React.FunctionComponent<Props> = (props) => {
                 {!mobile ? <div className="grid-manga-button-container">
                     <button className="grid-manga-button" onClick={() => navigate(`/manga/${props.id}`)} onAuxClick={onClick}>
                         <span className="grid-manga-button-hover">
-                            <img className="grid-manga-button-img" src={read}/>
+                            <ReadIcon className="grid-manga-button-img"/>
                             <span className="grid-manga-button-text">Read</span>
                         </span>
                     </button>
                     <button className="grid-manga-button" onClick={save}>
                         <span className="grid-manga-button-hover">
-                            <img className="grid-manga-button-img" src={saved ? unbookmark : bookmark}/>
+                            {saved ?
+                            <UnbookmarkIcon className="grid-manga-button-img"/> :
+                            <BookmarkIcon className="grid-manga-button-img"/>}
                             <span className="grid-manga-button-text">{saved ? "Unsave" : "Save"}</span>
                         </span>
                     </button>

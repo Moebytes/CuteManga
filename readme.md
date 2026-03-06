@@ -38,7 +38,7 @@ The whole "database" is stored in the `database.js` file instead of using a real
 
 You can look at the `database.example.js` to see the structure of the database.
 
-Clone the code from this repository and then install dependencies with `npm install`. 
+Clone the code from this repository and then install dependencies with `npm install --legacy-peer-deps`. 
 
 Start the web server with `npm start`. 
 

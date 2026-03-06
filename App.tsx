@@ -6,7 +6,6 @@ import HiddenPage from "./pages/HiddenPage"
 import MangaInfoPage from "./pages/MangaInfoPage"
 import MangaPage from "./pages/MangaPage"
 import AboutPage from "./pages/AboutPage"
-import TermsPage from "./pages/TermsPage"
 import ViewerPage from "./pages/ViewerPage"
 import $404Page from "./pages/404Page"
 import "./index.less"
@@ -45,9 +44,6 @@ const App: React.FunctionComponent = () => {
                 <Route path="/viewer" element={<ViewerPage/>}/>
                 <Route path="/hidden" element={<HiddenPage/>}/>
                 <Route path="/about" element={<AboutPage/>}/>
-                <Route path="/tos" element={<TermsPage/>}/>
-                <Route path="/terms" element={<TermsPage/>}/>
-                <Route path="/privacy" element={<TermsPage/>}/>
                 <Route path="/*" element={<$404Page/>}/>
             </Routes>
         </div>

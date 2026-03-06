@@ -3,23 +3,24 @@ import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useLayoutActions, useReadingSelector, useReadingActions, useThemeSelector, 
 useThemeActions, useFlagSelector, useFlagActions} from "../store"
 import functions from "../structures/Functions"
-import back from "../assets/icons/back.png"
-import bookmark from "../assets/icons/bookmark.png"
-import unbookmark from "../assets/icons/unbookmark.png"
-import englishToJapanese from "../assets/icons/englishToJapanese.png"
-import japaneseToEnglish from "../assets/icons/japaneseToEnglish.png"
-import hamburger from "../assets/icons/hamburger.png"
-import nextPage from "../assets/icons/nextPage.png"
-import prevPage from "../assets/icons/prevPage.png"
-import rightToLeft from "../assets/icons/rightToLeft.png"
-import topToBottom from "../assets/icons/topToBottom.png"
-import support from "../assets/icons/support.png"
-import zoomIn from "../assets/icons/zoomIn.png"
-import zoomOut from "../assets/icons/zoomOut.png"
-import reset from "../assets/icons/reset.png"
-import color from "../assets/icons/color.png"
-import invertIcon from "../assets/icons/invert.png"
-import invertOnIcon from "../assets/icons/invert-on.png"
+import BackIcon from "../assets/svg/back.svg"
+import BookmarkIcon from "../assets/svg/bookmark.svg"
+import UnbookmarkIcon from "../assets/svg/unbookmark.svg"
+import EnglishToJapaneseIcon from "../assets/svg/en-to-ja.svg"
+import JapaneseToEnglishIcon from "../assets/svg/ja-to-en.svg"
+import HamburgerIcon from "../assets/svg/hamburger.svg"
+import NextIcon from "../assets/svg/next.svg"
+import PrevIcon from "../assets/svg/prev.svg"
+import RightToLeftIcon from "../assets/svg/right-to-left.svg"
+import TopToBottomIcon from "../assets/svg/top-to-bottom.svg"
+import SupportIcon from "../assets/svg/support.svg"
+import ZoomInIcon from "../assets/svg/zoom-in.svg"
+import ZoomOutIcon from "../assets/svg/zoom-out.svg"
+import ResetIcon from "../assets/svg/reset.svg"
+import LightIcon from "../assets/svg/light.svg"
+import DarkIcon from "../assets/svg/dark.svg"
+import InvertIcon from "../assets/svg/invert.svg"
+import InvertOnIcon from "../assets/svg/invert-on.svg"
 import database from "../json/database"
 import hiddenDatabase from "../json/database-hidden"
 import Slider from "react-slider"
@@ -190,7 +191,8 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
         const pdfPage = document.querySelector(".react-pdf__Page__svg")
         const value = horizontal ? pdfPage?.clientWidth : pdfPage?.clientHeight
         if (!value || !element) return
-        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (value))) + 1 : Math.round(element.scrollTop / (value)) + 1
+        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (value))) + 1 : 
+            Math.round(element.scrollTop / (value)) + 1
         if (horizontal) {
             const newPage = current + 1
             navigateToPage(newPage > numPagesFlag ? numPagesFlag : newPage)
@@ -205,7 +207,8 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
         const pdfPage = document.querySelector(".react-pdf__Page__svg")
         const value = horizontal ? pdfPage?.clientWidth : pdfPage?.clientHeight
         if (!value || !element) return
-        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (value))) + 1 : Math.round(element.scrollTop / (value)) + 1
+        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (value))) + 1 : 
+            Math.round(element.scrollTop / (value)) + 1
         if (horizontal) {
             const newPage = current - 1
             navigateToPage(newPage < 1 ? 1 : newPage)
@@ -220,7 +223,8 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
         const pdfPage = document.querySelector(".react-pdf__Page__svg")
         const val = horizontal ? pdfPage?.clientWidth : pdfPage?.clientHeight
         if (!val || !element) return
-        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (val))) + 1 : Math.round(element.scrollTop / (val)) + 1
+        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (val))) + 1 : 
+            Math.round(element.scrollTop / (val)) + 1
         setHorizontal(value)
         setTimeout(() => {
             navigateToPage(current, value)
@@ -251,49 +255,55 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="pdf-controls" onMouseEnter={() => setEnableDrag(true)}>
             <div className="pdf-controls-box">
-                {!mobile ? <img className="pdf-controls-icon-small" src={hamburger} onClick={() => setShowThumbnails(!showThumbnails)}/> : null}
+                {!mobile ? <HamburgerIcon className="pdf-controls-icon-small" onClick={() => setShowThumbnails(!showThumbnails)}/> : null}
                 <div className="pdf-controls-page-container">
                     <span className="pdf-controls-page-text">Page:</span>
-                    <input className="pdf-controls-page-input" type="number" spellCheck={false} value={page} onChange={(event) => setPage(event.target.value)} onBlur={() => updatePage()} onMouseEnter={() => setEnableDrag(false)}/>
+                    <input className="pdf-controls-page-input" type="number" spellCheck={false} value={page} 
+                    onChange={(event) => setPage(event.target.value)} onBlur={() => updatePage()} onMouseEnter={() => setEnableDrag(false)}/>
                     <span className="pdf-controls-page-text">/ {numPagesFlag}</span>
                 </div>
-                <img className="pdf-controls-icon-mid" src={rightToLeft} onClick={() => changeHorizontal(true)}/>
-                <img className="pdf-controls-icon-mid" src={topToBottom} onClick={() => changeHorizontal(false)}/>
+                <RightToLeftIcon className="pdf-controls-icon-mid" onClick={() => changeHorizontal(true)}/>
+                <TopToBottomIcon className="pdf-controls-icon-mid" onClick={() => changeHorizontal(false)}/>
             </div>
             {!mobile ?
             <div className="pdf-controls-box">
-                <img className="pdf-controls-icon-small-alt" src={zoomOut} onClick={triggerZoomOut}/>
-                <img className="pdf-controls-icon-small" src={zoomIn} onClick={triggerZoomIn}/>
-                <input className="pdf-controls-zoom-input" type="number" spellCheck={false} value={parseInt(zoom)} onChange={(event) => setZoom(event.target.value)} onBlur={() => updateZoom()}/>
-                <img className="pdf-controls-icon-small" src={reset} onClick={() => setZoom("100%")} style={{height: "13px"}}/>
-                <img className="pdf-controls-icon-small" src={prevPage} onClick={triggerPrev}/>
-                <img className="pdf-controls-icon-small" src={nextPage} onClick={triggerNext}/>
+                <ZoomOutIcon className="pdf-controls-icon-small-alt" onClick={triggerZoomOut}/>
+                <ZoomInIcon className="pdf-controls-icon-small" onClick={triggerZoomIn}/>
+                <input className="pdf-controls-zoom-input" type="number" spellCheck={false} value={parseInt(zoom)} 
+                onChange={(event) => setZoom(event.target.value)} onBlur={() => updateZoom()}/>
+                <ResetIcon className="pdf-controls-icon-small" onClick={() => setZoom("100%")} style={{height: "13px"}}/>
+                <PrevIcon className="pdf-controls-icon-small" onClick={triggerPrev}/>
+                <NextIcon className="pdf-controls-icon-small" onClick={triggerNext}/>
             </div> : null}
             <div className="pdf-controls-box">
-                <img className="pdf-controls-icon" src={back} onClick={triggerBack}/>
-                <img className="pdf-controls-icon" src={invert ? invertOnIcon : invertIcon} onClick={() => setInvert(!invert)}/>
-                {!mobile ? <img className="pdf-controls-icon" src={saved ? unbookmark : bookmark} onClick={save}/> : null}
-                {/* <img className="pdf-controls-icon" src={dictionary}/> */}
-                <img className="pdf-controls-icon" src={showEn ? englishToJapanese : japaneseToEnglish} onClick={() => setShowEn(!showEn)}/>
-                {!mobile ? <img className="pdf-controls-icon" src={support} onClick={triggerSupport}/> : null}
-                <img className="pdf-controls-icon" src={color} onClick={() => setColorDropdown((prev) => !prev)}/>
-                {/* <img className="pdf-controls-icon" src={comment}/> */}
+                <BackIcon className="pdf-controls-icon" onClick={triggerBack}/>
+                {invert ?
+                <InvertOnIcon className="pdf-controls-icon" onClick={() => setInvert(!invert)}/> :
+                <InvertIcon className="pdf-controls-icon" onClick={() => setInvert(!invert)}/>}
+                {!mobile ? <>{saved ?
+                <UnbookmarkIcon className="pdf-controls-icon" onClick={save}/> :
+                <BookmarkIcon className="pdf-controls-icon" onClick={save}/>}</> : null}
+                {showEn ?
+                <EnglishToJapaneseIcon className="pdf-controls-icon" onClick={() => setShowEn(!showEn)}/> :
+                <JapaneseToEnglishIcon className="pdf-controls-icon" onClick={() => setShowEn(!showEn)}/>}
+                {!mobile ? <SupportIcon className="pdf-controls-icon" onClick={triggerSupport}/> : null}
+                <LightIcon className="pdf-controls-icon" onClick={() => setColorDropdown((prev) => !prev)}/>
             </div>
             <div className={`dropdown ${colorDropdown ? "" : "hide-dropdown"}`} style={{top: "40px"}}>
                 <div className="dropdown-row">
-                    {/* <img className="dropdown-icon" src={hueIcon} style={{filter: getFilter()}}/> */}
                     <span className="dropdown-text">Hue</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
+                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
+                    onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
                 </div>
                 <div className="dropdown-row">
-                    {/* <img className="dropdown-icon" src={saturationIcon} style={{filter: getFilter()}}/> */}
                     <span className="dropdown-text">Saturation</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
+                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
+                    onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
                 </div>
                 <div className="dropdown-row">
-                    {/* <img className="dropdown-icon" src={lightnessIcon} style={{filter: getFilter()}}/> */}
                     <span className="dropdown-text">Lightness</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
+                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
+                    onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
                 </div>
                 <div className="dropdown-row">
                     <button className="dropdown-button" onClick={() => resetFilters()}>Reset</button>
