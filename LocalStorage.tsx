@@ -4,11 +4,12 @@ import functions from "./structures/Functions"
 import {Themes} from "./reducers/themeReducer"
 
 const lightColorList = {
+    "--savedColor": "#b46788",
 	"--buttonBG": "#ffd1de",
 	"--textColor": "#80183e",
 	"--background": "#ffffff",
 	"--sidebarBG": "#ffffff",
-	"--navbarBG": "#fce6f2",
+	"--navbarBG": "#fee1f1",
 	"--titleColor": "#e36c94",
 	"--buttonText": "#ffffff",
 	"--buttonBG2": "#ff7ca5",
@@ -18,6 +19,7 @@ const lightColorList = {
 }
 
 const darkColorList = {
+    "--savedColor": "#b46788",
 	"--buttonBG": "#331926",
 	"--textColor": "#fdfcfc",
 	"--background": "#291520",

@@ -2,14 +2,15 @@ import React, {useEffect, useState, useRef} from "react"
 import {useLayoutSelector} from "../store"
 import {useNavigate} from "react-router-dom"
 import ReadIcon from "../assets/svg/read.svg"
-import BookmarkIcon from "../assets/svg/bookmark.svg"
-import UnbookmarkIcon from "../assets/svg/unbookmark.svg"
+import BookmarkIcon from "../assets/svg/bookmark-filled.svg"
 import "./styles/gridmanga.less"
 
 interface Props {
     img: string 
     title: string
     id: string
+    genres: string[]
+    volumes: number
     refresh: () => void
 }
 
@@ -110,26 +111,33 @@ const GridManga: React.FunctionComponent<Props> = (props) => {
             <div className="grid-manga-container">
                 <div className="grid-manga-img-container" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
                     <img className="grid-manga-img" src={props.img} ref={imageRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}/>
-                    <div className={`grid-manga-text-container ${!hover ? "hide-grid-manga-text" : ""}`}>
-                        <span className="grid-manga-text" style={{fontSize: getFontSize()}}>{props.title}</span>
+                </div>
+                <div className="grid-manga-info-container">
+                    <div className="grid-manga-title-container">
+                        <span className="grid-manga-title">{props.title}</span>
+                    </div>
+                    <span className="grid-manga-episode-count">{props.volumes} volumes</span>
+                    <div className="grid-manga-genre-container">
+                        {props.genres.map((genre) => (<button className="grid-manga-genre-button">{genre}</button>))}
+                    </div>
+
+                    <div className="grid-manga-button-container">
+                        <button className="grid-manga-button" onClick={() => navigate(`/manga/${props.id}`)} onAuxClick={onClick}
+                            style={{backgroundColor: "var(--buttonBG2)"}}>
+                            <span className="grid-manga-button-hover">
+                                <ReadIcon className="grid-manga-button-img" style={{color: "var(--buttonText)"}}/>
+                                <span className="grid-manga-button-text" style={{color: "var(--buttonText)"}}>Read</span>
+                            </span>
+                        </button>
+                        <button className="grid-manga-button" onClick={save}>
+                            <span className="grid-manga-button-hover2">
+                                <BookmarkIcon className="grid-manga-button-img" style={{color: saved ? "var(--savedColor" : "var(--textColor)"}}/>
+                                <span className="grid-manga-button-text" style={{color: saved ? "var(--savedColor" : "var(--textColor)"}}>
+                                    {saved ? "Saved" : "Save"}</span>
+                            </span>
+                        </button>
                     </div>
                 </div>
-                {!mobile ? <div className="grid-manga-button-container">
-                    <button className="grid-manga-button" onClick={() => navigate(`/manga/${props.id}`)} onAuxClick={onClick}>
-                        <span className="grid-manga-button-hover">
-                            <ReadIcon className="grid-manga-button-img"/>
-                            <span className="grid-manga-button-text">Read</span>
-                        </span>
-                    </button>
-                    <button className="grid-manga-button" onClick={save}>
-                        <span className="grid-manga-button-hover">
-                            {saved ?
-                            <UnbookmarkIcon className="grid-manga-button-img"/> :
-                            <BookmarkIcon className="grid-manga-button-img"/>}
-                            <span className="grid-manga-button-text">{saved ? "Unsave" : "Save"}</span>
-                        </span>
-                    </button>
-                </div> : null}
             </div>
         </div>
     )
