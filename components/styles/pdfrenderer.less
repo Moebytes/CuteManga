@@ -50,10 +50,15 @@
     width: 10%;
     max-height: 800px;
     overflow: auto;
-    background-color: var(--background);
+    background-color: var(--gridBG);
     transform-origin: left;
     transform: translateX(0px);
     transition: transform 0.3s;
+    scrollbar-width: none;
+}
+
+.pdf-thumbnail-container::-webkit-scrollbar {
+    display: none;
 }
 
 .thumbnail-hidden {
@@ -79,6 +84,11 @@
     transform-origin: top;
     transform: translateY(0px);
     transition: transform 0.3s;
+    scrollbar-width: none;
+}
+
+.thumbnail-horizontal::-webkit-scrollbar {
+    display: none;
 }
 
 .thumbnail-hidden-horizontal {
@@ -93,15 +103,16 @@
 
 .pdf-thumbnail {
     margin: 10px;
+        border: 3px solid transparent;
     &:hover {
         cursor: pointer;
         filter: brightness(120%);
-        border: 3px solid var(--gridButton);
+        border: 3px solid var(--buttonBG2);
     }
 }
 
 .selected {
-    border: 3px solid var(--gridButton);
+    border: 3px solid var(--buttonBG2);
 }
 
 @media screen and (max-width: 500px) {

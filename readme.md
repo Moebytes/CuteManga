@@ -2,6 +2,8 @@
 
 <img src="assets/images/readme.png">
 
+<img src="assets/images/reader.png">
+
 CuteManga is a web interface to study Japanese in a funner way by reading your favorite manga.
 
 You are responsible for filling it with your own content (covers, english manga, japanese manga with OCR text, and manga info).
@@ -69,7 +71,6 @@ Sometimes there will be "double pages", or a single page that actually contains 
 
 You also need to make sure that the Japanese manga has OCR text so that you can select and store the words you don't yet know. These are some tools that can help OCR your manga and convert them to PDF with selectable text:
 
-- [MangaOCR](https://github.com/kha-white/manga-ocr)
 - [Mokuro](https://github.com/kha-white/mokuro)
 - [Mokuro2Pdf](https://github.com/Kartoffel0/Mokuro2Pdf)
 

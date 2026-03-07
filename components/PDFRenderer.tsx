@@ -296,14 +296,14 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
         style={{maxHeight: horizontal ? 773 : 1600, touchAction: horizontal ? "pan-x" : "pan-y"}} 
         onClick={((e) => e.currentTarget.focus())}>
             {generateThumbnails()}
-            {enPDF && <Document renderMode="canvas" className={`pdf-document ${!showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""}`}  onLoadError={(e) => console.log(e)}
+            {enPDF && <Document renderMode="svg" className={`pdf-document ${!showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""}`}  onLoadError={(e) => console.log(e)}
             file={enPDF} key={enPDF} onLoadSuccess={onLoadSuccessEN} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
                 {visibilitiesEN.map((visible: boolean, index: number) => (
                     <PDFPage id={id} className="pdf-page" ref={pageRefsEN[index]} key={`pageEN_${index + 1}`} pageIndex={index} rootRef={rootRef}
                     visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                 ))}
             </Document>}
-            {jaPDF && <Document renderMode="canvas" className={`pdf-document ${showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""}`} onLoadError={(e) => console.log(e)}
+            {jaPDF && <Document renderMode="svg" className={`pdf-document ${showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""}`} onLoadError={(e) => console.log(e)}
             file={jaPDF} key={jaPDF} onLoadSuccess={onLoadSuccessJA} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
                 {visibilitiesJA.map((visible: boolean, index: number) => (
                     <PDFPage id={id} className="pdf-page" ref={pageRefsJA[index]} key={`pageJA_${index + 1}`} pageIndex={index} rootRef={rootRef}

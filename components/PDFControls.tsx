@@ -3,8 +3,6 @@ import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useLayoutActions, useReadingSelector, useReadingActions, useThemeSelector, 
 useThemeActions, useFlagSelector, useFlagActions} from "../store"
 import BackIcon from "../assets/svg/back.svg"
-import BookmarkIcon from "../assets/svg/bookmark.svg"
-import UnbookmarkIcon from "../assets/svg/unbookmark.svg"
 import EnglishToJapaneseIcon from "../assets/svg/en-to-ja.svg"
 import JapaneseToEnglishIcon from "../assets/svg/ja-to-en.svg"
 import HamburgerIcon from "../assets/svg/hamburger.svg"
@@ -32,7 +30,7 @@ interface Props {
 }
 
 const PDFControls: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme} = useThemeSelector()
     const {setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const {mobile} = useLayoutSelector()
     const {setEnableDrag} = useLayoutActions()
@@ -189,20 +187,6 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
         }, 500)
     }
 
-    const save = () => {
-        let bookmarkStr = localStorage.getItem("bookmarks")
-        if (!bookmarkStr) bookmarkStr = "{}"
-        const bookmarks = JSON.parse(bookmarkStr)
-        if (bookmarks[props.id]) {
-            delete bookmarks[props.id]
-            setSaved(false)
-        } else {
-            bookmarks[props.id] = true
-            setSaved(true)
-        }
-        localStorage.setItem("bookmarks", JSON.stringify(bookmarks))
-    }
-
     useEffect(() => {
         let bookmarkStr = localStorage.getItem("bookmarks")
         if (!bookmarkStr) bookmarkStr = "{}"
@@ -238,14 +222,13 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
                 {invert ?
                 <InvertOnIcon className="pdf-controls-icon" onClick={() => setInvert(!invert)}/> :
                 <InvertIcon className="pdf-controls-icon" onClick={() => setInvert(!invert)}/>}
-                {!mobile ? <>{saved ?
-                <UnbookmarkIcon className="pdf-controls-icon" onClick={save}/> :
-                <BookmarkIcon className="pdf-controls-icon" onClick={save}/>}</> : null}
                 {showEn ?
                 <EnglishToJapaneseIcon className="pdf-controls-icon" onClick={() => setShowEn(!showEn)}/> :
                 <JapaneseToEnglishIcon className="pdf-controls-icon" onClick={() => setShowEn(!showEn)}/>}
                 {!mobile ? <SupportIcon className="pdf-controls-icon" onClick={triggerSupport}/> : null}
-                <LightIcon className="pdf-controls-icon" onClick={() => setColorDropdown((prev) => !prev)}/>
+                {theme === "light" ?
+                <LightIcon className="pdf-controls-icon" onClick={() => setColorDropdown((prev) => !prev)}/> :
+                <DarkIcon className="pdf-controls-icon" onClick={() => setColorDropdown((prev) => !prev)}/>}
             </div>
             <HSLDropdown active={colorDropdown} top={40}/>
         </div>

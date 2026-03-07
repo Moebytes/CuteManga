@@ -4,6 +4,7 @@ import functions from "./structures/Functions"
 import {Themes} from "./reducers/themeReducer"
 
 const lightColorList = {
+    "--pdfControlsBG": "#ffc4d5",
     "--savedColor": "#b46788",
 	"--buttonBG": "#ffd1de",
 	"--textColor": "#80183e",
@@ -19,6 +20,7 @@ const lightColorList = {
 }
 
 const darkColorList = {
+    "--pdfControlsBG": "#643442",
     "--savedColor": "#b46788",
 	"--buttonBG": "#331926",
 	"--textColor": "#fdfcfc",
