@@ -8,7 +8,9 @@
     height: 100%;
     background-color: transparent;
     overflow: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    background-color: var(--background2);
 }
 
 .pdf-renderer-horizontal {
@@ -22,6 +24,7 @@
     width: 100%;
     min-height: 100%;
     height: auto;
+    transition: margin 0.2s;
 }
 
 .horizontal {
@@ -39,6 +42,10 @@
     pointer-events: none;
 }
 
+.move-left {
+    margin-left: 140px;
+}
+
 .pdf-thumbnail-container {
     position: fixed;
     z-index: 1500;
@@ -50,7 +57,7 @@
     width: 10%;
     max-height: 800px;
     overflow: auto;
-    background-color: var(--gridBG);
+    background-color: var(--background2);
     transform-origin: left;
     transform: translateX(0px);
     transition: transform 0.3s;
@@ -105,7 +112,6 @@
     margin: 10px;
         border: 3px solid transparent;
     &:hover {
-        cursor: pointer;
         filter: brightness(120%);
         border: 3px solid var(--buttonBG2);
     }

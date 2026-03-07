@@ -10,6 +10,7 @@ interface Props {
         artists: string[]
         published: string
         genres: string[]
+        difficulty: number
         synopsis: string
         synopsisSource: string
         website: string
@@ -50,6 +51,10 @@ const MangaInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="manga-info-text-row">
                         <span className="manga-info-text-category">Genres:</span>
                         <span className="manga-info-text-content">{props.info.genres.join(", ")}</span>
+                    </div>
+                    <div className="manga-info-text-row">
+                        <span className="manga-info-text-category">Difficulty:</span>
+                        <span className="manga-info-text-content">{props.info.difficulty}</span>
                     </div>
                     <div className="manga-info-text-row">
                         <span className="manga-info-text-category">Synopsis:</span>

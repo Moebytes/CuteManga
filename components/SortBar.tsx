@@ -5,6 +5,7 @@ import functions from "../structures/Functions"
 import DateIcon from "../assets/svg/date.svg"
 import AlphabeticIcon from "../assets/svg/alphabetic.svg"
 import BookmarkIcon from "../assets/svg/bookmark-filled.svg"
+import DifficultyIcon from "../assets/svg/difficulty.svg"
 import SortIcon from "../assets/svg/sort.svg"
 import SortReverseIcon from "../assets/svg/sort-reverse.svg"
 import SearchIcon from "../assets/svg/search.svg"
@@ -59,6 +60,12 @@ const SortBar: React.FunctionComponent = () => {
                         <span className="sortbar-button-hover" style={{filter: sort === "bookmarks" ? getFilter() : ""}}>
                             <BookmarkIcon className="sortbar-button-img"/>
                             <span className="sortbar-button-text">Bookmarks</span>
+                        </span>
+                    </button> : null}
+                    {!mobile ? <button className="sortbar-button" onClick={() => setSort("difficulty")}>
+                        <span className="sortbar-button-hover" style={{filter: sort === "difficulty" ? getFilter() : ""}}>
+                            <DifficultyIcon className="sortbar-button-img"/>
+                            <span className="sortbar-button-text">Difficulty</span>
                         </span>
                     </button> : null}
                     <button className="sortbar-button" onClick={() => setReverse(!reverse)}>

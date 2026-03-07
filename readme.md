@@ -36,7 +36,7 @@ https://nodejs.org/en/
 
 The whole "database" is stored in the `database.js` file instead of using a real database for easy editing.
 
-You can look at the `database.example.js` to see the structure of the database.
+You can look at the `database.example.js` to see the structure of the database. Ignore the functions at the top you don't need to edit them (they generate links in the structure that we expect).
 
 Clone the code from this repository and then install dependencies with `npm install --legacy-peer-deps`. 
 

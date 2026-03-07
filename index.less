@@ -29,7 +29,9 @@
     --savedColor: #b46788;
 	--buttonBG: #ffd1de;
 	--textColor: #80183e;
+	--textColor2: #1f0911;
 	--background: #ffffff;
+	--background2: #ffffff;
 	--sidebarBG: #ffffff;
 	--navbarBG: #fee1f1;
 	--titleColor: #e36c94;
@@ -44,7 +46,9 @@
     --pdfControlsBG: #643442;
 	--buttonBG: #331926;
 	--textColor: #fdfcfc;
+	--textColor2: #ffffff;
 	--background: #291520;
+	--background2: #000000;
 	--sidebarBG: #1f1117;
 	--navbarBG: #25131d;
 	--titleColor: #cf386d;
@@ -107,6 +111,7 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
+    min-height: 100vh;
     height: auto;
 }
 
@@ -193,4 +198,8 @@ img {
     100% {
         transform: rotate(360deg);
     }
+}
+
+a:hover, button:hover {
+    cursor: default;
 }

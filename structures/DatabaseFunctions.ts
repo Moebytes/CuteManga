@@ -1,8 +1,6 @@
 import database, {genres} from "../json/database.js"
 import hiddenDatabase from "../json/database-hidden.js"
 import functions from "./Functions.ts"
-import fs from "fs"
-import path from "path"
 
 export default class DatabaseFunctions {
     public static getRecent = () => {
@@ -54,6 +52,8 @@ export default class DatabaseFunctions {
                 if (bookmarks[m.id] === true) return true 
                 return false
             })
+        } else if (sort === "difficulty") {
+           mangas = mangas.sort((a, b) => a.difficulty < b.difficulty ? 1 : -1)
         } else {
             mangas = mangas.sort((a, b) => Date.parse(a.added) < Date.parse(b.added) ? 1 : -1)
         }
@@ -81,36 +81,12 @@ export default class DatabaseFunctions {
                 if (bookmarks[m.id] === true) return true 
                 return false
             })
+        } else if (sort === "difficulty") {
+           mangas = mangas.sort((a, b) => a.difficulty < b.difficulty ? 1 : -1)
         } else {
             mangas = mangas.sort((a, b) => Date.parse(a.added) < Date.parse(b.added) ? 1 : -1)
         }
         if (reverse) mangas = mangas.reverse()
         return mangas
-    }
-
-    public static logHiddenDB = (desc: string) => {
-        const mangaNames = fs.readdirSync("./covers").map((f) => path.basename(f))
-        let data = [] as any
-        for (let i = 0; i < mangaNames.length; i++) {
-            const title = mangaNames[i]
-            const id = title.toLowerCase().replaceAll(" ", "-")
-            data.push(`{
-                title: "${title}",
-                id: "${id}",
-                hidden: true,
-                japaneseTitle: "",
-                artists: [""],
-                published: "",
-                added: "${new Date().toISOString()}",
-                genres: ["${desc}"],
-                synopsis: "${desc}.",
-                synopsisSource: "",
-                website: "",
-                cover: getCover("${title}"),
-                volumeCount: 1,
-                volumes: getVolumes("${title}")
-            },`)
-        }
-        console.log(data)
     }
 }
