@@ -1,3 +1,9 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Cutemanga - Learn japanese by reading manga ❤             *
+ * Copyright © 2026 Moebytes <moebytes.com>                  *
+ * Licensed under CC BY-NC 4.0. See license.txt for details. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 import React, {useEffect, useState, useRef, useMemo, createRef, forwardRef} from "react"
 import {useLayoutSelector, useReadingSelector, useReadingActions, 
 useFlagSelector, useFlagActions} from "../store"

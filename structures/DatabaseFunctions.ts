@@ -1,3 +1,9 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Cutemanga - Learn japanese by reading manga ❤             *
+ * Copyright © 2026 Moebytes <moebytes.com>                  *
+ * Licensed under CC BY-NC 4.0. See license.txt for details. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 import database, {genres} from "../json/database.js"
 import hiddenDatabase from "../json/database-hidden.js"
 import functions from "./Functions.ts"

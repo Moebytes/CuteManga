@@ -1,4 +1,9 @@
-import database, {genres} from "../json/database.js"
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Cutemanga - Learn japanese by reading manga ❤             *
+ * Copyright © 2026 Moebytes <moebytes.com>                  *
+ * Licensed under CC BY-NC 4.0. See license.txt for details. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 import S3 from "aws-sdk/clients/s3"
 
 const s3 = new S3({region: "us-east-1", credentials: {
