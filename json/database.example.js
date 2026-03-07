@@ -69,6 +69,7 @@ export default [
             published: "",
             added: "",
             genres: [""],
+            difficulty: 0,
             synopsis: "",
             synopsisSource: "",
             website: "",
