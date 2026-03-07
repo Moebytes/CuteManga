@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react"
+import React from "react"
 import {useNavigate, useLocation} from "react-router-dom"
-import {useLayoutActions, useFlagActions, useSearchSelector, useSearchActions, useLayoutSelector} from "../store"
+import {useSearchSelector, useSearchActions, useLayoutSelector} from "../store"
 import RecentIcon from "../assets/svg/recent.svg"
 import GenreIcon from "../assets/svg/genre.svg"
 import SearchIcon from "../assets/svg/search.svg"
@@ -13,12 +13,9 @@ interface Props {
 }
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
-    const {search, sidebarSort} = useSearchSelector()
-    const {setSearch, setGenre, setSidebarSort} = useSearchActions()
+    const {sidebarSort} = useSearchSelector()
+    const {setGenre, setSidebarSort} = useSearchActions()
     const {mobile} = useLayoutSelector()
-    const {setEnableDrag} = useLayoutActions()
-    const {setSearchFlag} = useFlagActions()
-    const [showSearchBar, setShowSearchBar] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -28,34 +25,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         const color = bodyStyles.getPropertyValue("--sidebarLink")
         return functions.calculateFilter(color)
     }
-
-    const updateShowSearchBar = () => {
-        const sidebar = document.querySelector(".sidebar") as HTMLElement
-        const titlebar = document.querySelector(".titlebar") as HTMLElement
-        if (!sidebar || !titlebar) return
-        const height = titlebar.clientHeight
-        if (window.scrollY > height) {
-            setShowSearchBar(true)
-        } else {
-            setShowSearchBar(false)
-        }
-    }
-
-    useEffect(() => {
-        updateShowSearchBar()
-    }, [])
-
-    useEffect(() => {
-        const scrollHandler = () => {
-            updateShowSearchBar()
-        }
-        window.addEventListener("scroll", scrollHandler)
-        return () => {
-            setTimeout(() => {
-                window.removeEventListener("scroll", scrollHandler)
-            }, 10)
-        }
-    })
 
     const generateLinksJSX = () => {
         let jsx = [] as any
@@ -80,11 +49,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const searchClick = () => {
-        if (location.pathname !== "/" && location.pathname !== "/manga" && location.pathname !== "/home") navigate("/manga")
-        setSearchFlag(true)
-    }
-
     if (mobile) return null
 
     return (
@@ -93,8 +57,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             <div className="sidebar-container">
                 <div className="sidebar-content">
                     <span className="sidebar-text">
-                        A fun Japanese learning resource. <br/>
-                        Read manga with selectable text!
+                        Learn Japanese the fun way by reading manga!
                     </span>
                     <div className="sidebar-button-container">
                         <button className="sidebar-button" onClick={() => {setSidebarSort("recent"); setGenre("")}}>
@@ -110,17 +73,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </button>
                     </div>
-                    {showSearchBar ?
-                    <div className="sidebar-search-container" onMouseEnter={() => setEnableDrag(false)}>
-                        <input className="sidebar-search" type="search" placeholder="Manga name..." spellCheck="false" value={search} 
-                        onChange={(event) => setSearch(event.target.value)}/>
-                        <button className="sidebar-search-button" onClick={searchClick}>
-                            <span className="sidebar-search-button-hover">
-                                <SearchIcon className="sidebar-search-button-img"/>
-                            </span>
-                        </button>
-                    </div>
-                    : null}
                     <div className="sidebar-link-container">
                         {generateLinksJSX()}
                     </div>

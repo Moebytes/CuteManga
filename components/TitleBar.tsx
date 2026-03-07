@@ -6,6 +6,7 @@ import functions from "../structures/Functions"
 import LightIcon from "../assets/svg/light.svg"
 import DarkIcon from "../assets/svg/dark.svg"
 import Slider from "react-slider"
+import HSLDropdown from "../ui/HSLDropdown"
 import "./styles/titlebar.less"
 
 interface Props {
@@ -16,7 +17,7 @@ interface Props {
 const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {mobile} = useLayoutSelector()
     const {setEnableDrag} = useLayoutActions()
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {theme} = useThemeSelector()
     const {setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const [activeDropdown, setActiveDropdown] = useState(false)
     const navigate = useNavigate()
@@ -58,35 +59,16 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 <div className="titlebar-nav-container">
                     {!mobile ? <span className="titlebar-nav-text" onClick={() => props.hidden ? navigate("/hidden") : 
                         navigate("/manga")}>Manga</span> : null}
-                    {!mobile ? <span className="titlebar-nav-text" onClick={() => window.open(functions.isLocalHost() ? 
-                        "http://localhost:8081" : "https://cuteanime.moe", "_blank")}>Anime</span> : null}
                     <span className="titlebar-nav-text" onClick={() => navigate("/about")}>About</span>
                 </div>
                 {!mobile ? 
                 <div className="titlebar-nav-container">
-                    <LightIcon className="titlebar-nav-icon" onClick={() => setActiveDropdown((prev) => !prev)}/>
+                    {theme === "light" ?
+                    <LightIcon className="titlebar-nav-icon" onClick={() => setActiveDropdown((prev) => !prev)}/> : 
+                    <DarkIcon className="titlebar-nav-icon" onClick={() => setActiveDropdown((prev) => !prev)}/>}
                 </div> : null}
             </div>
-            <div className={`dropdown ${activeDropdown ? "" : "hide-dropdown"}`}>
-                <div className="dropdown-row">
-                    <span className="dropdown-text">Hue</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
-                    onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
-                </div>
-                <div className="dropdown-row">
-                    <span className="dropdown-text">Saturation</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
-                    onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
-                </div>
-                <div className="dropdown-row">
-                    <span className="dropdown-text">Lightness</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
-                    onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
-                </div>
-                <div className="dropdown-row">
-                    <button className="dropdown-button" onClick={() => resetFilters()}>Reset</button>
-                </div>
-            </div>
+            <HSLDropdown active={activeDropdown}/>
         </div>
     )
 }

@@ -23,6 +23,7 @@ import InvertOnIcon from "../assets/svg/invert-on.svg"
 import database from "../json/database"
 import hiddenDatabase from "../json/database-hidden"
 import Slider from "react-slider"
+import HSLDropdown from "../ui/HSLDropdown"
 import "./styles/pdfcontrols.less"
 
 interface Props {
@@ -246,26 +247,7 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
                 {!mobile ? <SupportIcon className="pdf-controls-icon" onClick={triggerSupport}/> : null}
                 <LightIcon className="pdf-controls-icon" onClick={() => setColorDropdown((prev) => !prev)}/>
             </div>
-            <div className={`dropdown ${colorDropdown ? "" : "hide-dropdown"}`} style={{top: "40px"}}>
-                <div className="dropdown-row">
-                    <span className="dropdown-text">Hue</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
-                    onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
-                </div>
-                <div className="dropdown-row">
-                    <span className="dropdown-text">Saturation</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
-                    onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
-                </div>
-                <div className="dropdown-row">
-                    <span className="dropdown-text">Lightness</span>
-                    <Slider className="dropdown-slider" trackClassName="dropdown-slider-track" thumbClassName="dropdown-slider-thumb" 
-                    onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
-                </div>
-                <div className="dropdown-row">
-                    <button className="dropdown-button" onClick={() => resetFilters()}>Reset</button>
-                </div>
-            </div>
+            <HSLDropdown active={colorDropdown} top={40}/>
         </div>
     )
 }
