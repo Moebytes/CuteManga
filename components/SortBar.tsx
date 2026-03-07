@@ -10,11 +10,7 @@ import SortReverseIcon from "../assets/svg/sort-reverse.svg"
 import SearchIcon from "../assets/svg/search.svg"
 import "./styles/sortbar.less"
 
-interface Props {
-    noButtons?: boolean
-}
-
-const SortBar: React.FunctionComponent<Props> = (props) => {
+const SortBar: React.FunctionComponent = () => {
     const {mobile} = useLayoutSelector()
     const {setEnableDrag} = useLayoutActions()
     const {search, sidebarSort, sort, reverse} = useSearchSelector()
@@ -44,43 +40,44 @@ const SortBar: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="sortbar" style={{justifyContent: props.noButtons ? "flex-end" : "space-between"}}>
-            {!props.noButtons ?
-            <div className="sortbar-button-container">
-                <button className="sortbar-button" onClick={() => setSort("date")}>
-                    <span className="sortbar-button-hover" style={{filter: sort === "date" ? getFilter() : ""}}>
-                        <DateIcon className="sortbar-button-img"/>
-                        <span className="sortbar-button-text">Date</span>
-                    </span>
-                </button>
-                <button className="sortbar-button" onClick={() => setSort("alphabetic")}>
-                    <span className="sortbar-button-hover" style={{filter: sort === "alphabetic" ? getFilter() : ""}}>
-                        <AlphabeticIcon className="sortbar-button-img"/>
-                        <span className="sortbar-button-text">Alphabetic</span>
-                    </span>
-                </button>
-                {!mobile ? <button className="sortbar-button" onClick={() => setSort("bookmarks")}>
-                    <span className="sortbar-button-hover" style={{filter: sort === "bookmarks" ? getFilter() : ""}}>
-                        <BookmarkIcon className="sortbar-button-img"/>
-                        <span className="sortbar-button-text">Bookmarks</span>
-                    </span>
-                </button> : null}
-                <button className="sortbar-button" onClick={() => setReverse(!reverse)}>
-                    <span className="sortbar-button-hover">
-                        {reverse ? 
-                        <SortReverseIcon className="sortbar-button-img"/> :
-                        <SortIcon className="sortbar-button-img"/>}
-                    </span>
-                </button>
-            </div> : null}
-            <div className="sortbar-search-container" onMouseEnter={() => setEnableDrag(false)}>
-                <input className="sortbar-search" type="search" placeholder="Manga name..." spellCheck="false" 
-                value={search} onChange={(event) => setSearch(event.target.value)}/>
-                <button className="sortbar-search-button" onClick={() => setSearchFlag(true)}>
-                    <span className="sortbar-search-button-hover">
-                        <SearchIcon className="sortbar-search-button-img"/>
-                    </span>
-                </button>
+        <div className="sortbar">
+            <div className="sortbar-island">
+                <div className="sortbar-button-container">
+                    <button className="sortbar-button" onClick={() => setSort("date")}>
+                        <span className="sortbar-button-hover" style={{filter: sort === "date" ? getFilter() : ""}}>
+                            <DateIcon className="sortbar-button-img"/>
+                            <span className="sortbar-button-text">Date</span>
+                        </span>
+                    </button>
+                    <button className="sortbar-button" onClick={() => setSort("alphabetic")}>
+                        <span className="sortbar-button-hover" style={{filter: sort === "alphabetic" ? getFilter() : ""}}>
+                            <AlphabeticIcon className="sortbar-button-img"/>
+                            <span className="sortbar-button-text">Alphabetic</span>
+                        </span>
+                    </button>
+                    {!mobile ? <button className="sortbar-button" onClick={() => setSort("bookmarks")}>
+                        <span className="sortbar-button-hover" style={{filter: sort === "bookmarks" ? getFilter() : ""}}>
+                            <BookmarkIcon className="sortbar-button-img"/>
+                            <span className="sortbar-button-text">Bookmarks</span>
+                        </span>
+                    </button> : null}
+                    <button className="sortbar-button" onClick={() => setReverse(!reverse)}>
+                        <span className="sortbar-button-hover">
+                            {reverse ? 
+                            <SortReverseIcon className="sortbar-button-img"/> :
+                            <SortIcon className="sortbar-button-img"/>}
+                        </span>
+                    </button>
+                </div>
+                <div className="sortbar-search-container" onMouseEnter={() => setEnableDrag(false)}>
+                    <input className="sortbar-search" type="search" spellCheck="false" 
+                    value={search} onChange={(event) => setSearch(event.target.value)}/>
+                    <button className="sortbar-search-button" onClick={() => setSearchFlag(true)}>
+                        <span className="sortbar-search-button-hover">
+                            <SearchIcon className="sortbar-search-button-img"/>
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
     )
