@@ -20,8 +20,6 @@ You can also toggle between top-to-bottom and right-to-left reading modes.
 
 Our design is available here: https://www.figma.com/design/T7EKhOdEwmeunR4V1QOGHT/CuteManga
 
-*New design is wip
-
 ### Effective Learning
 
 To make effective use of this resource, you should at least know Hiragana, Katakana, and basic grammar. 
