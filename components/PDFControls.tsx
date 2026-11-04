@@ -128,16 +128,33 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const getPDFPages = () => Array.from(document.querySelectorAll<HTMLElement>(
+        ".pdf-document:not(.hidden) > .pdf-page"
+    ))
+
+    const getCurrentPage = () => {
+        const element = document.querySelector(".pdf-renderer")
+        if (!element) return 1
+        const bounds = element.getBoundingClientRect()
+        const distances = getPDFPages().map((pdfPage) => {
+            const pageBounds = pdfPage.getBoundingClientRect()
+            return Math.abs(horizontal ? pageBounds.right - bounds.right : pageBounds.top - bounds.top)
+        })
+        return distances.length ? distances.indexOf(Math.min(...distances)) + 1 : 1
+    }
+
     const navigateToPage = (page: number, sideways?: boolean) => {
         const element = document.querySelector(".pdf-renderer")
-        const pdfPage = document.querySelector(".react-pdf__Page__svg")
-        let horizontalVal = sideways !== undefined ? sideways : horizontal
-        const value = horizontalVal ? pdfPage?.clientWidth : pdfPage?.clientHeight
-        if (!value || !element) return
+        const pages = getPDFPages()
+        const target = pages[Math.max(0, Math.min(pages.length - 1, page - 1))]
+        if (!element || !target) return
+        const bounds = element.getBoundingClientRect()
+        const pageBounds = target.getBoundingClientRect()
+        const horizontalVal = sideways !== undefined ? sideways : horizontal
         if (horizontalVal) {
-            element.scrollLeft = -Math.round(((page - 1) * value))
+            element.scrollLeft += pageBounds.right - bounds.right
         } else {
-            element.scrollTop = Math.round(((page - 1) * value))
+            element.scrollTop += pageBounds.top - bounds.top
         }
     }
 
@@ -149,44 +166,17 @@ const PDFControls: React.FunctionComponent<Props> = (props) => {
     }, [navigateFlag])
 
     const triggerPrev = () => {
-        const element = document.querySelector(".pdf-renderer")
-        const pdfPage = document.querySelector(".react-pdf__Page__svg")
-        const value = horizontal ? pdfPage?.clientWidth : pdfPage?.clientHeight
-        if (!value || !element) return
-        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (value))) + 1 : 
-            Math.round(element.scrollTop / (value)) + 1
-        if (horizontal) {
-            const newPage = current + 1
-            navigateToPage(newPage > numPagesFlag ? numPagesFlag : newPage)
-        } else {
-            const newPage = current - 1
-            navigateToPage(newPage < 1 ? 1 : newPage)
-        }
+        const current = getCurrentPage()
+        navigateToPage(horizontal ? Math.min(current + 1, numPagesFlag) : Math.max(current - 1, 1))
     }
 
     const triggerNext = () => {
-        const element = document.querySelector(".pdf-renderer")
-        const pdfPage = document.querySelector(".react-pdf__Page__svg")
-        const value = horizontal ? pdfPage?.clientWidth : pdfPage?.clientHeight
-        if (!value || !element) return
-        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (value))) + 1 : 
-            Math.round(element.scrollTop / (value)) + 1
-        if (horizontal) {
-            const newPage = current - 1
-            navigateToPage(newPage < 1 ? 1 : newPage)
-        } else {
-            const newPage = current + 1
-            navigateToPage(newPage > numPagesFlag ? numPagesFlag : newPage)
-        }
+        const current = getCurrentPage()
+        navigateToPage(horizontal ? Math.max(current - 1, 1) : Math.min(current + 1, numPagesFlag))
     }
 
     const changeHorizontal = (value: boolean) => {
-        const element = document.querySelector(".pdf-renderer")
-        const pdfPage = document.querySelector(".react-pdf__Page__svg")
-        const val = horizontal ? pdfPage?.clientWidth : pdfPage?.clientHeight
-        if (!val || !element) return
-        const current = horizontal ? Math.abs(Math.round((element.scrollLeft) / (val))) + 1 : 
-            Math.round(element.scrollTop / (val)) + 1
+        const current = getCurrentPage()
         setHorizontal(value)
         setTimeout(() => {
             navigateToPage(current, value)

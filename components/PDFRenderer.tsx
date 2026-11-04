@@ -19,22 +19,37 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString()
 
-const Placeholder = ({width}) => {
-    const a4AspectRatio = 1.4142
-    const height = a4AspectRatio * width
-    return <div style={{width: width, height: height}}/>
+const loadPDFSource = async (source: any, signal: AbortSignal) => {
+    if (typeof source !== "string" || /^(blob:|data:)/i.test(source)) return source
+    const response = await fetch(source, {cache: "no-store", signal})
+    if (!response.ok || response.status === 206) {
+        throw new Error(`Unable to download complete PDF (${response.status})`)
+    }
+    return response.blob()
 }
 
-const PDFPage = forwardRef(function PDFPage({visible, pageIndex, width, scale, id, style, rootRef}: any, ref: any) {
-    const placeholder = <Placeholder width={width}/>
-  
+const pdfOptions = {disableAutoFetch: true, disableStream: true}
+
+const PDFPage = forwardRef(function PDFPage({visible, active, language, pageIndex, width, scale, id, style, rootRef}: any, ref: any) {
+    const [aspectRatio, setAspectRatio] = useState(1.4142)
+    const scaledWidth = width * scale
+    const height = scaledWidth * aspectRatio
+    const placeholder = <div style={{width: scaledWidth, height}}/>
+    
+    const onLoadSuccess = (pdfPage: any) => {
+        const viewport = pdfPage.getViewport({scale: 1})
+        setAspectRatio(viewport.height / viewport.width)
+    }
+
     return (
-        <div ref={ref} data-page-index={pageIndex} style={style}>
-          {visible ? (
-            <WrappedPage width={width} pageNumber={pageIndex + 1} loading={placeholder} scale={scale} id={id} rootRef={rootRef}/>
-          ) : placeholder}
+        <div className="pdf-page" ref={ref} data-page-index={pageIndex} data-language={language}
+        style={{...style, width: scaledWidth, height, flexShrink: 0}}>
+            {visible ? (
+                <WrappedPage width={width} pageNumber={pageIndex + 1} loading={placeholder} scale={scale}
+                id={id} rootRef={rootRef} active={active} onLoadSuccess={onLoadSuccess}/>
+            ) : placeholder}
         </div>
-      )
+    )
 })
 
 const PDFThumbnail = forwardRef(function PDFThumbnail({pageNumber, width, className, key, onRenderSuccess, style, 
@@ -62,7 +77,6 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     const {setNumPagesFlag, setNavigateFlag} = useFlagActions()
     const [numPagesJA, setNumPagesJA] = React.useState(0)
     const [numPagesEN, setNumPagesEN] = React.useState(0)
-    const [numPagesThumb, setNumPagesThumb] = React.useState(0)
     const [enPDF, setEnPDF] = useState(null) as any
     const [jaPDF, setJaPDF] = useState(null) as any
     const [observer, setObserver] = useState(null) as any
@@ -75,27 +89,44 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
 
     const id = `${props.id} ${props.num}`
 
-    const loadPDF = async () => {
-        if (props.source !== undefined) {
-            setJaPDF(props.source)
-            return
-        }
-        let manga = database.find((m) => m.id === props.id)
-        if (!manga) manga = hiddenDatabase.find((m) => m.id === props.id)
-        if (!manga) return navigate(`/404`)
-        const volume = manga.volumes.find((v: any) => v.volumeNumber === Number(props.num))
-        if (!volume) return navigate(`/404`)
-        setJaPDF(volume.japaneseSource)
-        setEnPDF(volume.englishSource)
-    }
-    
     useEffect(() => {
-        loadPDF()
-    }, [])
+        const controller = new AbortController()
+        setNumPagesJA(0)
+        setNumPagesEN(0)
+        setVisibilitiesJA([])
+        setVisibilitiesEN([])
+        setThumbsRenderedJA(0)
+        setThumbsRenderedEN(0)
+        setJaPDF(null)
+        setEnPDF(null)
 
-    useEffect(() => {
-        loadPDF()
-    }, [props.source])
+        const load = async (source: any, language: "ja" | "en", setPDF: (source: any) => void) => {
+            if (!source) return
+            try {
+                const file = await loadPDFSource(source, controller.signal)
+                if (!controller.signal.aborted) setPDF(file)
+            } catch (error) {
+                if (!controller.signal.aborted) {
+                    console.error("Failed to load PDF", error)
+                }
+            } finally {
+            }
+        }
+
+        if (props.source !== undefined) {
+            load(props.source, "ja", setJaPDF)
+        } else {
+            const manga = database.find((m) => m.id === props.id) || hiddenDatabase.find((m) => m.id === props.id)
+            const volume = manga?.volumes.find((v: any) => v.volumeNumber === Number(props.num))
+            if (!volume) {
+                navigate(`/404`)
+            } else {
+                load(volume.japaneseSource, "ja", setJaPDF)
+                load(volume.englishSource, "en", setEnPDF)
+            }
+        }
+        return () => controller.abort()
+    }, [props.id, props.num, props.source])
 
     useEffect(() => {
         const keyDown = (event: KeyboardEvent) => {
@@ -121,54 +152,42 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     const getScale = () => {
         if (!zoom) return 1
         const value = Number(zoom?.replace("%", "")) / 100
-        if (!value || Number.isNaN(value)) return 1
+        if (!Number.isFinite(value) || value <= 0) return 1
         return value
     }
     
-    let amount = 1600 / getScale()
+    let amount = 1600
 
     let observerOptions = {
         root: rootRef.current,
         rootMargin: horizontal ? `0px ${amount}px` : `${amount}px 0px`,
-        threshold: 0.2
+        threshold: 0
     }
 
-    const observerCallback = (entries: any, io: any) => {
-        const intersects = entries.reduce((acc: any, entry: any) => {
-            const pageIndex = parseInt(entry.target.getAttribute("data-page-index"))
-            return {
-            ...acc,
-            [pageIndex]: entry.isIntersecting
-            }
-        }, {})
-    
-        setVisibilitiesJA((prev: any) => prev.map((visible: any, index: any) => {
-            if (intersects.hasOwnProperty(index)) { return intersects[index]; }
-            return visible;
-        }))
-
-        setVisibilitiesEN((prev: any) => prev.map((visible: any, index: any) => {
-            if (intersects.hasOwnProperty(index)) { return intersects[index]; }
-            return visible;
-        }))
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+        const update = (language: string, setVisibilities: any) => {
+            const intersects = new Map(entries.filter((entry) =>
+                entry.target.getAttribute("data-language") === language
+            ).map((entry) => [Number(entry.target.getAttribute("data-page-index")), entry.isIntersecting]))
+            if (!intersects.size) return
+            setVisibilities((prev: boolean[]) => prev.map((visible, index) => intersects.get(index) ?? visible))
+        }
+        update("ja", setVisibilitiesJA)
+        update("en", setVisibilitiesEN)
     }
 
     useEffect(() => {
-         const io = new IntersectionObserver(observerCallback, observerOptions)
-         setObserver(io)
-         return () => io.disconnect()
-    }, [])
-
-    useEffect(() => {
-        const io = new IntersectionObserver(observerCallback, observerOptions)
+        const io = new IntersectionObserver(observerCallback, {...observerOptions, root: rootRef.current})
         setObserver(io)
         return () => io.disconnect()
    }, [horizontal, zoom])
 
     useEffect(() => {
         if (observer) {
-          pageRefsJA.forEach((p) => observer.observe(p.current))
-          pageRefsEN.forEach((p) => observer.observe(p.current))
+          pageRefsJA.forEach((p) => {if (p.current) observer.observe(p.current)})
+          pageRefsEN.forEach((p) => {if (p.current) observer.observe(p.current)})
+          const elements = [...pageRefsJA, ...pageRefsEN].map((p) => p.current).filter(Boolean)
+          return () => elements.forEach((element) => observer.unobserve(element))
         }
     }, [observer, pageRefsJA, pageRefsEN])
 
@@ -207,10 +226,10 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
             <div onClick={((e) => {showEn ? e.currentTarget.firstElementChild?.focus() : e.currentTarget.lastElementChild?.focus(); e.stopPropagation()})}>
             <Document className={`pdf-thumbnail-container ${!showThumbnails || !showEn ? horizontal ? "thumbnail-hidden-horizontal" : 
                 "thumbnail-hidden" : ""} ${horizontal ? "thumbnail-horizontal" : ""}`} file={enPDF} noData="" loading="" 
-                options={{disableAutoFetch: true, disableStream: true}}>
+                options={pdfOptions}>
                 {Array.from(new Array(thumbsToRenderEN), (el, index) => {
                     const rendering = thumbsToRenderEN === index + 1
-                    const lastThumb = numPagesThumb === index + 1
+                    const lastThumb = numPagesEN === index + 1
                     const renderNextThumb = rendering && !lastThumb
                     return (
                       <PDFThumbnail className={`pdf-thumbnail ${Number(page) === index + 1 ? "selected" : ""}`} width={100} 
@@ -222,10 +241,10 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
             </Document>
             <Document className={`pdf-thumbnail-container ${!showThumbnails || showEn ? horizontal ? "thumbnail-hidden-horizontal" : 
                 "thumbnail-hidden" : ""} ${horizontal ? "thumbnail-horizontal" : ""}`} file={jaPDF} noData="" loading="" 
-                options={{disableAutoFetch: true, disableStream: true}}>
+                options={pdfOptions}>
                 {Array.from(new Array(thumbsToRenderJA), (el, index) => {
                     const rendering = thumbsToRenderJA === index + 1
-                    const lastThumb = numPagesThumb === index + 1
+                    const lastThumb = numPagesJA === index + 1
                     const renderNextThumb = rendering && !lastThumb
                     return (
                       <PDFThumbnail className={`pdf-thumbnail ${Number(page) === index + 1 ? "selected" : ""}`} 
@@ -303,16 +322,16 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
         onClick={((e) => e.currentTarget.focus())}>
             {generateThumbnails()}
              <Document renderMode="svg" className={`pdf-document ${!showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""} ${showThumbnails ? "move-left" : ""}`}  onLoadError={(e) => console.log(e)}
-            file={enPDF} key={enPDF} onLoadSuccess={onLoadSuccessEN} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
+            file={enPDF} onLoadSuccess={onLoadSuccessEN} noData="" loading="" options={pdfOptions}>
                 {visibilitiesEN.map((visible: boolean, index: number) => (
-                    <PDFPage id={id} className="pdf-page" ref={pageRefsEN[index]} key={`pageEN_${index + 1}`} pageIndex={index} rootRef={rootRef}
+                    <PDFPage id={id} className="pdf-page" ref={pageRefsEN[index]} key={`pageEN_${index + 1}`} language="en" active={showEn} pageIndex={index} rootRef={rootRef}
                     visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                 ))}
             </Document>
             <Document renderMode="svg" className={`pdf-document ${showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""} ${showThumbnails ? "move-left" : ""}`} onLoadError={(e) => console.log(e)}
-            file={jaPDF} key={jaPDF} onLoadSuccess={onLoadSuccessJA} noData="" loading="" options={{disableAutoFetch: true, disableStream: true}}>
+            file={jaPDF} onLoadSuccess={onLoadSuccessJA} noData="" loading="" options={pdfOptions}>
                 {visibilitiesJA.map((visible: boolean, index: number) => (
-                    <PDFPage id={id} className="pdf-page" ref={pageRefsJA[index]} key={`pageJA_${index + 1}`} pageIndex={index} rootRef={rootRef}
+                    <PDFPage id={id} className="pdf-page" ref={pageRefsJA[index]} key={`pageJA_${index + 1}`} language="ja" active={!showEn} pageIndex={index} rootRef={rootRef}
                     visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                 ))}
             </Document>
