@@ -9,7 +9,7 @@ import {useReadingSelector, useReadingActions} from "../store"
 import {Page} from "react-pdf"
 import {useInView} from "react-intersection-observer"
 
-const WrappedPage = ({pageNumber, width, loading, scale, id, rootRef, active, onLoadSuccess}) => {
+const WrappedPage = ({pageNumber, width, loading, scale, id, rootRef, active}) => {
     const {page, horizontal} = useReadingSelector()
     const {setPage} = useReadingActions()
     const {ref, inView} = useInView({root: rootRef?.current || null, threshold: 0.2})
@@ -37,7 +37,7 @@ const WrappedPage = ({pageNumber, width, loading, scale, id, rootRef, active, on
     return (
         <div ref={ref}>
             <Page pageNumber={pageNumber} width={width} loading={loading} scale={scale} 
-            renderAnnotationLayer={false} onLoadSuccess={onLoadSuccess}/>
+            renderAnnotationLayer={false}/>
         </div>
     )
 }

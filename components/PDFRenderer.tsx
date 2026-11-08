@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef, useMemo, createRef, forwardRef} from "react"
+import React, {useEffect, useLayoutEffect, useState, useRef, useMemo, createRef, forwardRef} from "react"
 import {useLayoutSelector, useReadingSelector, useReadingActions, 
 useFlagSelector, useFlagActions} from "../store"
 import {useNavigate} from "react-router-dom"
@@ -12,6 +12,7 @@ import {Document, Page, pdfjs} from "react-pdf"
 import WrappedPage from "./WrappedPage"
 import database from "../json/database"
 import hiddenDatabase from "../json/database-hidden"
+import {capturePDFPosition, restorePDFPosition, PDFPosition} from "../structures/PDFPosition"
 import "./styles/pdfrenderer.less"
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -30,23 +31,25 @@ const loadPDFSource = async (source: any, signal: AbortSignal) => {
 
 const pdfOptions = {disableAutoFetch: true, disableStream: true}
 
-const PDFPage = forwardRef(function PDFPage({visible, active, language, pageIndex, width, scale, id, style, rootRef}: any, ref: any) {
-    const [aspectRatio, setAspectRatio] = useState(1.4142)
+const getPageAspectRatios = (pdf: any): Promise<number[]> => Promise.all(
+    Array.from({length: pdf.numPages}, async (_, index) => {
+        const page = await pdf.getPage(index + 1)
+        const viewport = page.getViewport({scale: 1})
+        return viewport.height / viewport.width
+    })
+)
+
+const PDFPage = forwardRef(function PDFPage({visible, active, language, pageIndex, width, scale, aspectRatio, id, style, rootRef}: any, ref: any) {
     const scaledWidth = width * scale
     const height = scaledWidth * aspectRatio
     const placeholder = <div style={{width: scaledWidth, height}}/>
     
-    const onLoadSuccess = (pdfPage: any) => {
-        const viewport = pdfPage.getViewport({scale: 1})
-        setAspectRatio(viewport.height / viewport.width)
-    }
-
     return (
         <div className="pdf-page" ref={ref} data-page-index={pageIndex} data-language={language}
         style={{...style, width: scaledWidth, height, flexShrink: 0}}>
             {visible ? (
                 <WrappedPage width={width} pageNumber={pageIndex + 1} loading={placeholder} scale={scale}
-                id={id} rootRef={rootRef} active={active} onLoadSuccess={onLoadSuccess}/>
+                id={id} rootRef={rootRef} active={active}/>
             ) : placeholder}
         </div>
     )
@@ -77,6 +80,8 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     const {setNumPagesFlag, setNavigateFlag} = useFlagActions()
     const [numPagesJA, setNumPagesJA] = React.useState(0)
     const [numPagesEN, setNumPagesEN] = React.useState(0)
+    const [aspectRatiosJA, setAspectRatiosJA] = useState<number[]>([])
+    const [aspectRatiosEN, setAspectRatiosEN] = useState<number[]>([])
     const [enPDF, setEnPDF] = useState(null) as any
     const [jaPDF, setJaPDF] = useState(null) as any
     const [observer, setObserver] = useState(null) as any
@@ -85,14 +90,27 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     const [thumbsRenderedJA, setThumbsRenderedJA] = useState(0) as any
     const [thumbsRenderedEN, setThumbsRenderedEN] = useState(0) as any
     const rootRef = useRef(null) as any
+    const positionRef = useRef<PDFPosition | null>(null)
+    const positionLanguage = useRef(showEn)
+    const pendingPosition = useRef(false)
+    const documentVersion = useRef(0)
     const navigate = useNavigate()
 
     const id = `${props.id} ${props.num}`
+
+    useLayoutEffect(() => {
+        positionRef.current = null
+        pendingPosition.current = false
+        positionLanguage.current = showEn
+        documentVersion.current++
+    }, [props.id, props.num, props.source])
 
     useEffect(() => {
         const controller = new AbortController()
         setNumPagesJA(0)
         setNumPagesEN(0)
+        setAspectRatiosJA([])
+        setAspectRatiosEN([])
         setVisibilitiesJA([])
         setVisibilitiesEN([])
         setThumbsRenderedJA(0)
@@ -149,6 +167,28 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
         return Array.from(new Array(numPagesEN), () => createRef())
     }, [numPagesEN])
 
+    const getActivePages = (): HTMLElement[] => (showEn ? pageRefsEN : pageRefsJA)
+        .map((ref) => ref.current as HTMLElement | null).filter((element): element is HTMLElement => Boolean(element))
+
+    const rememberPosition = () => {
+        if (!rootRef.current || pendingPosition.current) return
+        const position = capturePDFPosition(rootRef.current, getActivePages(), horizontal)
+        if (position) positionRef.current = position
+    }
+
+    useLayoutEffect(() => {
+        if (positionLanguage.current !== showEn) {
+            pendingPosition.current = Boolean(positionRef.current)
+            positionLanguage.current = showEn
+        }
+        if (!rootRef.current) return
+        if (pendingPosition.current && positionRef.current) {
+            if (!restorePDFPosition(rootRef.current, getActivePages(), horizontal, positionRef.current)) return
+            pendingPosition.current = false
+        }
+        rememberPosition()
+    }, [showEn, numPagesJA, numPagesEN, horizontal, zoom, mobile])
+
     const getScale = () => {
         if (!zoom) return 1
         const value = Number(zoom?.replace("%", "")) / 100
@@ -192,6 +232,16 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     }, [observer, pageRefsJA, pageRefsEN])
 
     const onLoadSuccessJA = async (pdf: any) => {
+        const version = documentVersion.current
+        let aspectRatios: number[]
+        try {
+            aspectRatios = await getPageAspectRatios(pdf)
+        } catch (error) {
+            console.error(error)
+            return
+        }
+        if (version !== documentVersion.current) return
+        setAspectRatiosJA(aspectRatios)
         setNumPagesJA(pdf.numPages)
         setNumPagesFlag(pdf.numPages)
         setVisibilitiesJA(Array.from(new Array(pdf.numPages), () => false))
@@ -204,6 +254,16 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     }
 
     const onLoadSuccessEN = async (pdf: any) => {
+        const version = documentVersion.current
+        let aspectRatios: number[]
+        try {
+            aspectRatios = await getPageAspectRatios(pdf)
+        } catch (error) {
+            console.error(error)
+            return
+        }
+        if (version !== documentVersion.current) return
+        setAspectRatiosEN(aspectRatios)
         setNumPagesEN(pdf.numPages)
         setNumPagesFlag(pdf.numPages)
         setVisibilitiesEN(Array.from(new Array(pdf.numPages), () => false))
@@ -319,20 +379,20 @@ const PDFRenderer: React.FunctionComponent<Props> = (props) => {
     return (
         <div className={`pdf-renderer drag ${horizontal ? "pdf-renderer-horizontal" : ""}`} ref={rootRef} 
         style={{maxHeight: horizontal ? 773 : 1600, touchAction: horizontal ? "pan-x" : "pan-y"}} 
-        onClick={((e) => e.currentTarget.focus())}>
+        onClick={((e) => e.currentTarget.focus())} onScroll={rememberPosition}>
             {generateThumbnails()}
              <Document renderMode="svg" className={`pdf-document ${!showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""} ${showThumbnails ? "move-left" : ""}`}  onLoadError={(e) => console.log(e)}
             file={enPDF} onLoadSuccess={onLoadSuccessEN} noData="" loading="" options={pdfOptions}>
                 {visibilitiesEN.map((visible: boolean, index: number) => (
                     <PDFPage id={id} className="pdf-page" ref={pageRefsEN[index]} key={`pageEN_${index + 1}`} language="en" active={showEn} pageIndex={index} rootRef={rootRef}
-                    visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
+                    visible={visible} width={getWidth()} scale={getScale()} aspectRatio={aspectRatiosEN[index]} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                 ))}
             </Document>
             <Document renderMode="svg" className={`pdf-document ${showEn ? "hidden" : ""} ${horizontal ? "horizontal" : ""} ${showThumbnails ? "move-left" : ""}`} onLoadError={(e) => console.log(e)}
             file={jaPDF} onLoadSuccess={onLoadSuccessJA} noData="" loading="" options={pdfOptions}>
                 {visibilitiesJA.map((visible: boolean, index: number) => (
                     <PDFPage id={id} className="pdf-page" ref={pageRefsJA[index]} key={`pageJA_${index + 1}`} language="ja" active={!showEn} pageIndex={index} rootRef={rootRef}
-                    visible={visible} width={getWidth()} scale={getScale()} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
+                    visible={visible} width={getWidth()} scale={getScale()} aspectRatio={aspectRatiosJA[index]} style={{filter: invert ? "invert(1) grayscale(1) brightness(1.5)" : ""}}/>
                 ))}
             </Document>
         </div>
